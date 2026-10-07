@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-sans: 'Plus Jakarta Sans', 'Noto Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    
+    /* Warm, Trustworthy Agricultural Palette */
+    --color-agri-green-950: #0D2818;
+    --color-agri-green-900: #143E23;
+    --color-agri-green-800: #1B5E20;
+    --color-agri-green-700: #2E7D32;
+    --color-agri-green-600: #388E3C;
+    --color-agri-green-500: #4CAF50;
+    --color-agri-green-100: #E8F5E9;
+    --color-agri-green-50: #F1F8F3;
+    
+    --color-earth-800: #5D4037;
+    --color-earth-700: #6D4C41;
+    --color-earth-600: #795548;
+    --color-earth-100: #EFEBE9;
+    --color-earth-50: #F7F5F3;
+
+    --color-sun-amber: #D97706;
+    --color-sun-light: #FFFBEB;
+    
+    --color-warm-bg: #F8F9F5;
+    --color-warm-surface: #FFFFFF;
+    --color-warm-border: #E5E7EB;
+    --color-warm-text: #1E2922;
+    --color-warm-muted: #5A6A60;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-warm-bg);
+    color: var(--color-warm-text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Custom scrollbars for clean dashboards */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Print Styles for PDF / Report Generation */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+}
