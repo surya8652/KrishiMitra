@@ -12,7 +12,7 @@ import {
   ArrowRight, 
   GraduationCap, 
   BookOpen, 
-  Youtube, 
+  PlayCircle, 
   Award, 
   CheckCircle2, 
   Compass,
@@ -262,7 +262,7 @@ export const SectorsGuidePage: React.FC = () => {
 
               <Link to={`/students/youtube?sector=${activeSector.id}`}>
                 <Button size="sm" variant="outline" className="border-red-300 text-red-700 bg-white hover:bg-red-50 text-xs font-bold gap-1.5 cursor-pointer">
-                  <Youtube className="h-3.5 w-3.5 text-red-600" />
+                  <PlayCircle className="h-3.5 w-3.5 text-red-600" />
                   <span>Curated YouTube Videos</span>
                 </Button>
               </Link>

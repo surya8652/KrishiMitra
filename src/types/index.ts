@@ -14,7 +14,21 @@ export interface LanguageOption {
   nativeName: string
 }
 
-export type UserRole = 'farmer' | 'admin'
+export type UserRole = 'guest' | 'farmer' | 'admin' | 'student'
+
+export interface StudentProfile {
+  id: string
+  name: string
+  phone: string
+  email?: string
+  role: 'student'
+  stream: string
+  classLevel?: string
+  targetCareer?: string
+  interests?: string[]
+  preferredLanguage?: SupportedLanguage
+  avatar?: string
+}
 
 export interface FarmerProfile {
   id: string

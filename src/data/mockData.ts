@@ -49,6 +49,19 @@ export const ADMIN_USER = {
   zone: 'All-India Central & State Directorate'
 }
 
+export const DEFAULT_STUDENT = {
+  id: 'student_pooja_01',
+  name: 'Pooja Deshmukh',
+  phone: '+91 97654 32100',
+  email: 'pooja.student@krishimitra.edu',
+  role: 'student' as const,
+  stream: 'Class 12 - Science (PCM)',
+  classLevel: 'Class 12',
+  targetCareer: 'Architecture (B.Arch) / Computer Science',
+  interests: ['Mathematics', 'Design', 'Technology'],
+  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80'
+}
+
 // All-India Dynamic Weather Generator
 export const getWeatherForLocation = (district: string, state: string): WeatherData => {
   const isNorthern = ['Punjab', 'Haryana', 'Uttar Pradesh', 'Rajasthan', 'Delhi', 'Uttarakhand'].includes(state)

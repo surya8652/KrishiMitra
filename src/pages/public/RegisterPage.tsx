@@ -8,12 +8,24 @@ import { LanguageSelector } from '@/components/LanguageSelector'
 import { SUPPORTED_LANGUAGES } from '@/data/mockData'
 import { ALL_INDIA_STATES } from '@/data/indiaLocations'
 import { SupportedLanguage } from '@/types'
-import { Sprout, Phone, User, Lock, MapPin, CheckCircle, ArrowRight, AlertCircle } from 'lucide-react'
+import { 
+  Sprout, 
+  Phone, 
+  User, 
+  Lock, 
+  MapPin, 
+  CheckCircle, 
+  ArrowRight, 
+  AlertCircle,
+  GraduationCap,
+  BookOpen
+} from 'lucide-react'
 
 export const RegisterPage: React.FC = () => {
-  const { signUpWithSupabase, updateFarmer, setRole, showToast, t, language, setLanguage } = useApp()
+  const { signUpWithSupabase, showToast, t, language, setLanguage } = useApp()
   const navigate = useNavigate()
 
+  const [selectedRole, setSelectedRole] = useState<'farmer' | 'student'>('farmer')
   const [step, setStep] = useState<1 | 2>(1)
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -26,10 +38,15 @@ export const RegisterPage: React.FC = () => {
     state: 'Maharashtra',
     district: 'Nashik',
     village: '',
+    // Farmer fields
     landSize: '2',
     landUnit: 'acres' as const,
     soilType: 'Medium Black Clayey Loam',
-    mainCrop: 'Tomato'
+    mainCrop: 'Tomato',
+    // Student fields
+    stream: 'Class 12 - Science (PCM)',
+    targetCareer: 'Architecture (B.Arch) / Civil Engineering',
+    classLevel: 'Class 12'
   })
 
   const currentState = ALL_INDIA_STATES.find(s => s.name === formData.state) || ALL_INDIA_STATES[0]
@@ -50,23 +67,43 @@ export const RegisterPage: React.FC = () => {
     setErrorMessage(null)
 
     try {
-      const res = await signUpWithSupabase({
-        emailOrPhone: formData.phone,
-        password: formData.password,
-        name: formData.name,
-        village: formData.village || 'Kisan Village',
-        district: formData.district,
-        state: formData.state,
-        landSize: parseFloat(formData.landSize) || 2,
-        soilType: formData.soilType,
-        mainCrops: [formData.mainCrop || 'Tomato']
-      })
+      if (selectedRole === 'farmer') {
+        const res = await signUpWithSupabase({
+          emailOrPhone: formData.phone,
+          password: formData.password,
+          name: formData.name,
+          role: 'farmer',
+          village: formData.village || 'Kisan Village',
+          district: formData.district,
+          state: formData.state,
+          landSize: parseFloat(formData.landSize) || 2,
+          soilType: formData.soilType,
+          mainCrops: [formData.mainCrop || 'Tomato']
+        })
 
-      if (res.success) {
-        showToast(`Welcome to KrishiMitra, ${formData.name}! Account registered with Supabase.`)
-        navigate('/farmer')
+        if (res.success) {
+          showToast(`Welcome to KrishiMitra, ${formData.name}! Farmer account created.`)
+          navigate('/farmer')
+        } else {
+          setErrorMessage(res.error || 'Failed to complete registration')
+        }
       } else {
-        setErrorMessage(res.error || 'Failed to complete registration')
+        // Student registration
+        const res = await signUpWithSupabase({
+          emailOrPhone: formData.phone,
+          password: formData.password,
+          name: formData.name,
+          role: 'student',
+          district: formData.district,
+          state: formData.state
+        })
+
+        if (res.success) {
+          showToast(`Welcome to KrishiMitra, ${formData.name}! Student Career account created.`)
+          navigate('/students')
+        } else {
+          setErrorMessage(res.error || 'Failed to complete registration')
+        }
       }
     } catch (err: any) {
       setErrorMessage(err?.message || 'Registration error')
@@ -75,7 +112,7 @@ export const RegisterPage: React.FC = () => {
     }
   }
 
-  const handleSkipFarmDetails = async () => {
+  const handleSkipDetails = async () => {
     setLoading(true)
     setErrorMessage(null)
 
@@ -84,13 +121,18 @@ export const RegisterPage: React.FC = () => {
         emailOrPhone: formData.phone,
         password: formData.password,
         name: formData.name,
+        role: selectedRole,
         district: formData.district,
         state: formData.state
       })
 
       if (res.success) {
         showToast(`Welcome to KrishiMitra, ${formData.name}!`)
-        navigate('/farmer')
+        if (selectedRole === 'student') {
+          navigate('/students')
+        } else {
+          navigate('/farmer')
+        }
       } else {
         setErrorMessage(res.error || 'Registration failed')
       }
@@ -113,32 +155,72 @@ export const RegisterPage: React.FC = () => {
 
         <Card className="border-[#D1D5DB] shadow-md">
           <CardHeader className="text-center pb-2">
-            <div className="mx-auto h-12 w-12 rounded-xl bg-[#1B5E20] flex items-center justify-center text-white mb-2 shadow-sm">
-              <Sprout className="h-6 w-6" />
+            <div className={`mx-auto h-12 w-12 rounded-xl flex items-center justify-center text-white mb-2 shadow-sm ${
+              selectedRole === 'student' ? 'bg-indigo-600' : 'bg-[#1B5E20]'
+            }`}>
+              {selectedRole === 'student' ? (
+                <GraduationCap className="h-6 w-6" />
+              ) : (
+                <Sprout className="h-6 w-6" />
+              )}
             </div>
             <CardTitle className="text-2xl font-bold text-gray-900">
-              {step === 1 ? 'Create Farmer Account' : 'Tell Us About Your Farm'}
-            </CardTitle>
-            <CardDescription className="text-gray-600 text-sm">
               {step === 1 
-                ? 'Join thousands of farmers across India using KrishiMitra AI'
-                : 'Localize weather, soil advice, and mandi intelligence to your plot'}
+                ? (selectedRole === 'farmer' ? 'Create Farmer Account' : 'Create Student Account')
+                : (selectedRole === 'farmer' ? 'Tell Us About Your Farm' : 'Your Academic Stream & Goals')
+              }
+            </CardTitle>
+            <CardDescription className="text-gray-600 text-xs">
+              {step === 1 
+                ? 'Join thousands of farmers and students across rural and urban India'
+                : (selectedRole === 'farmer' ? 'Localize weather, soil advice, and mandi intelligence' : 'Personalize your career roadmap, engineering & architecture guidance')
+              }
             </CardDescription>
 
-            {/* Supabase Status & Step progress */}
-            <div className="pt-2 flex items-center justify-center gap-3">
-              <span className="text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
-                <CheckCircle className="h-3 w-3 text-emerald-600" />
-                Supabase Connected
-              </span>
-              <div className="flex items-center gap-1">
-                <span className={`h-2 w-8 rounded-full ${step >= 1 ? 'bg-[#1B5E20]' : 'bg-gray-200'}`} />
-                <span className={`h-2 w-8 rounded-full ${step === 2 ? 'bg-[#1B5E20]' : 'bg-gray-200'}`} />
+            {/* Position Selector at Step 1 */}
+            {step === 1 && (
+              <div className="pt-3">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5 text-left">
+                  I want to register as:
+                </label>
+                <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedRole('farmer')}
+                    className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      selectedRole === 'farmer'
+                        ? 'bg-white text-[#1B5E20] shadow-xs'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <Sprout className="h-4 w-4" />
+                    <span>Farmer (शेतकरी)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedRole('student')}
+                    className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      selectedRole === 'student'
+                        ? 'bg-white text-indigo-700 shadow-xs'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <GraduationCap className="h-4 w-4" />
+                    <span>Student (विद्यार्थी)</span>
+                  </button>
+                </div>
               </div>
+            )}
+
+            {/* Step progress dots */}
+            <div className="pt-2 flex items-center justify-center gap-2">
+              <span className={`h-2 w-8 rounded-full ${step >= 1 ? (selectedRole === 'student' ? 'bg-indigo-600' : 'bg-[#1B5E20]') : 'bg-gray-200'}`} />
+              <span className={`h-2 w-8 rounded-full ${step === 2 ? (selectedRole === 'student' ? 'bg-indigo-600' : 'bg-[#1B5E20]') : 'bg-gray-200'}`} />
             </div>
           </CardHeader>
 
-          <CardContent className="pt-4">
+          <CardContent className="pt-3">
             {errorMessage && (
               <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-2 text-xs text-rose-800">
                 <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-rose-600" />
@@ -147,14 +229,14 @@ export const RegisterPage: React.FC = () => {
             )}
 
             {step === 1 ? (
-              <form onSubmit={handleStep1Submit} className="space-y-4">
+              <form onSubmit={handleStep1Submit} className="space-y-3.5">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
                     Your Full Name
                   </label>
                   <Input
                     type="text"
-                    placeholder="e.g. Ramesh Singh / Rajesh Patil"
+                    placeholder={selectedRole === 'farmer' ? "e.g. Ramesh Singh / Rajesh Patil" : "e.g. Pooja Deshmukh / Amit Verma"}
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     icon={<User className="h-4 w-4" />}
@@ -259,13 +341,16 @@ export const RegisterPage: React.FC = () => {
 
                 <Button
                   type="submit"
-                  className="w-full bg-[#1B5E20] hover:bg-[#144818] text-white font-bold h-12 text-base gap-2 cursor-pointer"
+                  className={`w-full text-white font-bold h-11 text-sm gap-2 cursor-pointer ${
+                    selectedRole === 'student' ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-[#1B5E20] hover:bg-[#144818]'
+                  }`}
                 >
-                  <span>Continue to Farm Details</span>
+                  <span>Continue to Step 2</span>
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </form>
-            ) : (
+            ) : selectedRole === 'farmer' ? (
+              // Farmer Step 2 Form
               <form onSubmit={handleFinish} className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
@@ -344,19 +429,95 @@ export const RegisterPage: React.FC = () => {
                   <Button
                     type="submit"
                     isLoading={loading}
-                    className="w-full bg-[#1B5E20] hover:bg-[#144818] text-white font-bold h-12 text-base cursor-pointer"
+                    className="w-full bg-[#1B5E20] hover:bg-[#144818] text-white font-bold h-11 text-sm cursor-pointer"
                   >
-                    Complete Registration with Supabase
+                    Complete Farmer Registration
                   </Button>
 
                   <Button
                     type="button"
                     variant="ghost"
-                    onClick={handleSkipFarmDetails}
+                    onClick={handleSkipDetails}
                     disabled={loading}
                     className="w-full text-xs text-gray-500 hover:text-gray-900 cursor-pointer"
                   >
                     Skip farm details for now
+                  </Button>
+                </div>
+              </form>
+            ) : (
+              // Student Step 2 Form
+              <form onSubmit={handleFinish} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                    Current Class / Level
+                  </label>
+                  <select
+                    value={formData.classLevel}
+                    onChange={(e) => setFormData({ ...formData, classLevel: e.target.value })}
+                    className="w-full h-11 rounded-xl border border-gray-300 px-3 bg-white text-sm"
+                  >
+                    <option value="Class 10">Class 10 (Secondary School)</option>
+                    <option value="Class 11">Class 11 (Junior College / High School)</option>
+                    <option value="Class 12">Class 12 (Board Prep / Senior School)</option>
+                    <option value="Polytechnic / Diploma">Polytechnic / Diploma</option>
+                    <option value="Undergraduate (B.Tech / B.Sc / B.Arch)">Undergraduate Degree</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                    Academic Stream
+                  </label>
+                  <select
+                    value={formData.stream}
+                    onChange={(e) => setFormData({ ...formData, stream: e.target.value })}
+                    className="w-full h-11 rounded-xl border border-gray-300 px-3 bg-white text-sm"
+                  >
+                    <option value="Class 12 - Science (PCM)">Science - Physics, Chemistry, Maths (PCM)</option>
+                    <option value="Class 12 - Science (PCB)">Science - Physics, Chemistry, Biology (PCB)</option>
+                    <option value="Class 12 - Science (PCMB)">Science - Both Maths & Biology (PCMB)</option>
+                    <option value="Commerce with Maths">Commerce with Maths</option>
+                    <option value="Arts / Humanities">Arts / Humanities with Design</option>
+                    <option value="Diploma in Engineering">Diploma in Engineering / Architectural Draughtsman</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                    Primary Target Career Interest
+                  </label>
+                  <select
+                    value={formData.targetCareer}
+                    onChange={(e) => setFormData({ ...formData, targetCareer: e.target.value })}
+                    className="w-full h-11 rounded-xl border border-gray-300 px-3 bg-white text-sm"
+                  >
+                    <option value="Architecture (B.Arch) / Interior Design">Architecture (B.Arch) & Building Design (NATA / JEE Paper 2)</option>
+                    <option value="Civil & Structural Engineering">Civil & Structural Engineering (JEE / MHT-CET)</option>
+                    <option value="Computer Science & AI Engineering">Computer Science & AI Engineering</option>
+                    <option value="Agricultural Engineering & Agritech">Agricultural Engineering & Agritech</option>
+                    <option value="Mechanical & Mechatronics">Mechanical & Robotics Engineering</option>
+                    <option value="Pure Mathematics & Data Science">Pure Mathematics & Data Science</option>
+                  </select>
+                </div>
+
+                <div className="pt-2 flex flex-col gap-2">
+                  <Button
+                    type="submit"
+                    isLoading={loading}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-11 text-sm cursor-pointer"
+                  >
+                    Complete Student Registration
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={handleSkipDetails}
+                    disabled={loading}
+                    className="w-full text-xs text-gray-500 hover:text-gray-900 cursor-pointer"
+                  >
+                    Skip stream details for now
                   </Button>
                 </div>
               </form>

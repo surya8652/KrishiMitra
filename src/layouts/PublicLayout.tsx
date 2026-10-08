@@ -5,7 +5,15 @@ import { LanguageSelector } from '@/components/LanguageSelector'
 import { useApp } from '@/context/AppContext'
 
 export const PublicLayout: React.FC = () => {
-  const { t } = useApp()
+  const { t, isAuthenticated, role, logout } = useApp()
+
+  const getPortalLink = () => {
+    if (role === 'admin') return { to: '/admin', label: 'Admin Portal' }
+    if (role === 'student') return { to: '/students', label: 'Student Hub' }
+    return { to: '/farmer', label: 'Farmer App' }
+  }
+
+  const portal = getPortalLink()
 
   return (
     <div className="min-h-screen bg-[#F8F9F5] flex flex-col text-[#1E2922]">
@@ -39,18 +47,38 @@ export const PublicLayout: React.FC = () => {
             <LanguageSelector compact />
 
             <div className="flex items-center gap-2">
-              <Link
-                to="/login"
-                className="text-xs sm:text-sm font-bold px-3 py-2 rounded-lg text-[#1B5E20] hover:bg-[#E8F5E9] transition-colors"
-              >
-                {t.login}
-              </Link>
-              <Link
-                to="/register"
-                className="text-xs sm:text-sm font-bold px-4 py-2 rounded-lg bg-[#1B5E20] text-white hover:bg-[#144818] shadow-xs transition-all"
-              >
-                {t.getStarted}
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  <Link
+                    to={portal.to}
+                    className="text-xs sm:text-sm font-bold px-3 py-2 rounded-lg bg-[#1B5E20] text-white hover:bg-[#144818] shadow-xs transition-all"
+                  >
+                    Open {portal.label}
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => logout()}
+                    className="text-xs sm:text-sm font-semibold px-2.5 py-2 rounded-lg text-gray-600 hover:text-red-700 hover:bg-red-50 border border-gray-200 transition-colors cursor-pointer"
+                  >
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="text-xs sm:text-sm font-bold px-3 py-2 rounded-lg text-[#1B5E20] hover:bg-[#E8F5E9] transition-colors"
+                  >
+                    {t.login}
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="text-xs sm:text-sm font-bold px-4 py-2 rounded-lg bg-[#1B5E20] text-white hover:bg-[#144818] shadow-xs transition-all"
+                  >
+                    {t.getStarted}
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -113,6 +141,14 @@ export const PublicLayout: React.FC = () => {
             <div className="flex items-center gap-2 text-xs font-semibold text-emerald-300 bg-[#26372E] p-2.5 rounded-lg border border-[#334A3E]">
               <HeartHandshake className="h-4 w-4 shrink-0" />
               <span>Free for all Indian farmers and students</span>
+            </div>
+            <div className="pt-2">
+              <Link 
+                to="/login?role=admin&redirect=/admin" 
+                className="text-[11px] text-gray-500 hover:text-emerald-400 transition-colors inline-block"
+              >
+                🔒 Directorate & Admin Portal Login →
+              </Link>
             </div>
           </div>
         </div>

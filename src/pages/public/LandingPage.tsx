@@ -18,7 +18,8 @@ import {
   WifiOff,
   Globe2,
   FileCheck2,
-  Users2
+  Users2,
+  GraduationCap
 } from 'lucide-react'
 import { useApp } from '@/context/AppContext'
 
@@ -73,6 +74,14 @@ export const LandingPage: React.FC = () => {
       description: "Connect farmers and buyers.",
       link: "/farmer/marketplace",
       color: "bg-orange-50 text-orange-900 border-orange-200"
+    },
+    {
+      icon: GraduationCap,
+      title: "Student Career Hub",
+      nativeBadge: "विद्यार्थी करिअर हब",
+      description: "Smart career sector analyzer, math & engineering guidance, curated notes & video lectures.",
+      link: "/students",
+      color: "bg-indigo-50 text-indigo-900 border-indigo-200"
     }
   ]
 
@@ -134,6 +143,13 @@ export const LandingPage: React.FC = () => {
               <Button size="lg" className="w-full sm:w-auto bg-[#2E7D32] hover:bg-[#256628] text-white text-base font-bold shadow-lg gap-2 cursor-pointer">
                 <span>{t.getStarted}</span>
                 <ArrowRight className="h-5 w-5" />
+              </Button>
+            </Link>
+
+            <Link to="/students" className="w-full sm:w-auto">
+              <Button variant="outline" size="lg" className="w-full sm:w-auto bg-indigo-950/70 hover:bg-indigo-900 text-indigo-200 border-indigo-400/40 backdrop-blur-xs text-base font-semibold cursor-pointer gap-2">
+                <GraduationCap className="h-5 w-5 text-indigo-400" />
+                <span>Student Career Hub</span>
               </Button>
             </Link>
 

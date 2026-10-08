@@ -14,7 +14,7 @@ import {
   ArrowRight, 
   Award, 
   BookOpen, 
-  Youtube, 
+  PlayCircle, 
   RotateCcw, 
   Printer, 
   Check, 
@@ -661,7 +661,7 @@ export const CareerAnalyzerPage: React.FC = () => {
 
                         <Link to={`/students/youtube?sector=${rec.sector.id}`}>
                           <Button size="sm" variant="outline" className="text-xs font-bold gap-1.5 cursor-pointer bg-white hover:bg-red-50 border-red-200 text-red-700">
-                            <Youtube className="h-3.5 w-3.5" />
+                            <PlayCircle className="h-3.5 w-3.5" />
                             <span>YouTube Lectures</span>
                           </Button>
                         </Link>

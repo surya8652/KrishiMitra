@@ -8,11 +8,13 @@ import {
   IrrigationAdvice, 
   NotificationItem, 
   AdminPlatformMetrics,
-  SupportedLanguage
+  SupportedLanguage,
+  UserRole
 } from '../types'
 import { 
   DEFAULT_FARMER, 
   ADMIN_USER, 
+  DEFAULT_STUDENT,
   MOCK_WEATHER, 
   MOCK_IRRIGATION, 
   MOCK_DISEASE_REPORTS, 
@@ -70,12 +72,16 @@ export const authService = {
     return DEFAULT_FARMER
   },
 
-  getUserRole: (): 'farmer' | 'admin' => {
-    return (localStorage.getItem(STORAGE_KEYS.ROLE) as 'farmer' | 'admin') || 'farmer'
+  getUserRole: (): UserRole => {
+    return (localStorage.getItem(STORAGE_KEYS.ROLE) as UserRole) || 'guest'
   },
 
-  setUserRole: (role: 'farmer' | 'admin') => {
-    localStorage.setItem(STORAGE_KEYS.ROLE, role)
+  setUserRole: (role: UserRole) => {
+    if (role === 'guest') {
+      localStorage.removeItem(STORAGE_KEYS.ROLE)
+    } else {
+      localStorage.setItem(STORAGE_KEYS.ROLE, role)
+    }
   },
 
   updateProfile: (updated: Partial<FarmerProfile>): FarmerProfile => {
@@ -95,7 +101,7 @@ export const authService = {
     return merged
   },
 
-  signInWithSupabase: async (identifier: string, password: string): Promise<{ success: boolean; user?: any; error?: string }> => {
+  signInWithSupabase: async (identifier: string, password: string, selectedRole: UserRole = 'farmer'): Promise<{ success: boolean; user?: any; error?: string }> => {
     const cleanId = identifier.trim()
     const email = cleanId.includes('@') ? cleanId : `${cleanId.replace(/[^0-9a-zA-Z]/g, '')}@krishimitra.farm`
 
@@ -106,7 +112,7 @@ export const authService = {
       })
 
       if (error) {
-        // If user credentials do not exist yet, attempt automatic registration so farmers can sign in directly
+        // If user credentials do not exist yet, attempt automatic registration so users can sign in directly
         const isNotFound = error.message.toLowerCase().includes('invalid login credentials') ||
                             error.message.toLowerCase().includes('user not found')
 
@@ -116,18 +122,19 @@ export const authService = {
             password,
             options: {
               data: {
-                name: 'Kisan Member',
+                name: selectedRole === 'admin' ? 'Directorate Officer' : (selectedRole === 'student' ? 'Student Member' : 'Kisan Member'),
                 phone: cleanId,
-                role: 'farmer'
+                role: selectedRole
               }
             }
           })
           if (!signUpError && signUpData.user) {
-            authService.setUserRole('farmer')
+            authService.setUserRole(selectedRole)
             const newProfile: FarmerProfile = {
               ...DEFAULT_FARMER,
               id: signUpData.user.id,
-              name: 'Kisan Member',
+              name: selectedRole === 'admin' ? 'Dr. Ramesh Kulkarni' : (selectedRole === 'student' ? 'Pooja Deshmukh' : 'Kisan Member'),
+              role: selectedRole,
               phone: cleanId.startsWith('+91') ? cleanId : `+91 ${cleanId}`,
               email
             }
@@ -139,7 +146,8 @@ export const authService = {
       }
 
       if (data.user) {
-        authService.setUserRole('farmer')
+        const userRole = (data.user.user_metadata?.role as UserRole) || selectedRole || 'farmer'
+        authService.setUserRole(userRole)
         const meta = data.user.user_metadata
         if (meta?.profile) {
           localStorage.setItem(STORAGE_KEYS.FARMER, JSON.stringify(meta.profile))
@@ -150,7 +158,8 @@ export const authService = {
             id: data.user.id,
             name: meta.name || current.name,
             phone: meta.phone || current.phone,
-            email: data.user.email || current.email
+            email: data.user.email || current.email,
+            role: userRole
           }
           localStorage.setItem(STORAGE_KEYS.FARMER, JSON.stringify(updated))
         }
@@ -229,15 +238,17 @@ export const authService = {
   signOutSupabase: async () => {
     try {
       await supabase.auth.signOut()
-      localStorage.removeItem(STORAGE_KEYS.ROLE)
+      localStorage.setItem(STORAGE_KEYS.ROLE, 'guest')
     } catch (e) {
       console.error(e)
     }
   },
 
-  loginDemo: (role: 'farmer' | 'admin') => {
+  loginDemo: (role: 'farmer' | 'admin' | 'student') => {
     authService.setUserRole(role)
-    return role === 'farmer' ? DEFAULT_FARMER : ADMIN_USER
+    if (role === 'admin') return ADMIN_USER
+    if (role === 'student') return DEFAULT_STUDENT
+    return DEFAULT_FARMER
   }
 }
 

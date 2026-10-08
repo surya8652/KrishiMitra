@@ -53,11 +53,14 @@ interface AppContextType {
   showToast: (msg: string) => void
   isVoiceListening: boolean
   toggleVoiceListening: () => void
-  signInWithSupabase: (identifier: string, password: string) => Promise<{ success: boolean; error?: string }>
+  isAuthenticated: boolean
+  loginDemo: (role: 'farmer' | 'admin' | 'student') => void
+  signInWithSupabase: (identifier: string, password: string, selectedRole?: UserRole) => Promise<{ success: boolean; error?: string }>
   signUpWithSupabase: (params: {
     emailOrPhone: string
     password: string
     name: string
+    role?: UserRole
     village?: string
     district?: string
     state?: string
@@ -237,13 +240,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }
 
-  const signInWithSupabase = async (identifier: string, password: string) => {
-    const res = await authService.signInWithSupabase(identifier, password)
+  const loginDemo = (selectedRole: 'farmer' | 'admin' | 'student') => {
+    const profile = authService.loginDemo(selectedRole)
+    setRoleState(selectedRole)
+    if (selectedRole === 'farmer') {
+      setFarmer(profile as FarmerProfile)
+      showToast(`Logged in as Farmer: ${profile.name}`)
+    } else if (selectedRole === 'admin') {
+      showToast(`Logged in as Admin: ${profile.name}`)
+    } else if (selectedRole === 'student') {
+      showToast(`Logged in as Student: ${profile.name}`)
+    }
+  }
+
+  const signInWithSupabase = async (identifier: string, password: string, selectedRole: UserRole = 'farmer') => {
+    const res = await authService.signInWithSupabase(identifier, password, selectedRole)
     if (res.success) {
       const current = authService.getCurrentUser()
       setFarmer(current)
-      setRole('farmer')
-      showToast(`Welcome, ${current.name}! Connected via Supabase.`)
+      setRoleState(selectedRole)
+      showToast(`Welcome, ${current.name}! Signed in as ${selectedRole}.`)
     }
     return res
   }
@@ -252,6 +268,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     emailOrPhone: string
     password: string
     name: string
+    role?: UserRole
     village?: string
     district?: string
     state?: string
@@ -263,19 +280,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (res.success) {
       const current = authService.getCurrentUser()
       setFarmer(current)
-      setRole('farmer')
-      showToast(`Farmer account created with Supabase! Welcome ${current.name}.`)
+      const userRole = params.role || 'farmer'
+      setRoleState(userRole)
+      showToast(`Account created with Supabase! Welcome ${current.name}.`)
     }
     return res
   }
 
   const logout = async () => {
     await authService.signOutSupabase()
-    setRole('farmer')
-    showToast('Logged out successfully')
+    setRoleState('guest')
+    showToast('Logged out successfully. You are now in Guest Mode.')
   }
 
   const unreadCount = notifications.filter(n => !n.read).length
+  const isAuthenticated = role !== 'guest'
 
   return (
     <AppContext.Provider
@@ -307,6 +326,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         showToast,
         isVoiceListening,
         toggleVoiceListening,
+        isAuthenticated,
+        loginDemo,
         signInWithSupabase,
         signUpWithSupabase,
         logout,

@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 
 export const FarmerHeader: React.FC<{ onToggleSidebar?: () => void }> = ({ onToggleSidebar }) => {
-  const { farmer, unreadCount, role, setRole, t } = useApp()
+  const { farmer, unreadCount, role, setRole, t, logout } = useApp()
   const navigate = useNavigate()
   const [locationModalOpen, setLocationModalOpen] = useState(false)
 
@@ -82,36 +82,23 @@ export const FarmerHeader: React.FC<{ onToggleSidebar?: () => void }> = ({ onTog
             <span>Student Hub</span>
           </Link>
 
-          {/* Quick Role Switcher for seamless review */}
+          {/* Verified Farmer Badge */}
+          <div className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+            <UserCheck className="h-3.5 w-3.5 text-emerald-700" />
+            <span>Kisan Member</span>
+          </div>
+
+          {/* Logout Button */}
           <button
             type="button"
-            onClick={() => {
-              if (role === 'farmer') {
-                setRole('admin')
-                navigate('/admin')
-              } else {
-                setRole('farmer')
-                navigate('/farmer')
-              }
+            onClick={async () => {
+              await logout()
+              navigate('/login')
             }}
-            className={`hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
-              role === 'admin' 
-                ? 'bg-amber-100 text-amber-900 border-amber-300' 
-                : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
-            }`}
-            title="Toggle between Farmer and Admin views"
+            className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-gray-600 hover:text-red-700 hover:bg-red-50 border border-gray-200 transition-colors cursor-pointer"
+            title="Sign out of account"
           >
-            {role === 'admin' ? (
-              <>
-                <ShieldCheck className="h-3.5 w-3.5 text-amber-700" />
-                <span>Admin View (Switch to Farmer)</span>
-              </>
-            ) : (
-              <>
-                <UserCheck className="h-3.5 w-3.5 text-emerald-700" />
-                <span>Farmer View (Switch to Admin)</span>
-              </>
-            )}
+            <span>Sign Out</span>
           </button>
 
           {/* Regional Language Selector */}
@@ -150,9 +137,7 @@ export const FarmerHeader: React.FC<{ onToggleSidebar?: () => void }> = ({ onTog
       </div>
 
       {/* Location Modal */}
-      {locationModalOpen && (
-        <LocationSelectorModal onClose={() => setLocationModalOpen(false)} />
-      )}
+      <LocationSelectorModal open={locationModalOpen} onOpenChange={setLocationModalOpen} />
     </header>
   )
 }

@@ -43,12 +43,14 @@ import { MarketReportsPage } from '@/pages/admin/reports/MarketReportsPage'
 import { MarketplaceReportsPage } from '@/pages/admin/reports/MarketplaceReportsPage'
 import { SystemReportsPage } from '@/pages/admin/reports/SystemReportsPage'
 
+import { ProtectedRoute } from '@/components/ProtectedRoute'
+
 export function App() {
   return (
     <AppProvider>
       <BrowserRouter>
         <Routes>
-          {/* Public Routes */}
+          {/* Public Routes - Accessible to all (Guest Mode by default) */}
           <Route element={<PublicLayout />}>
             <Route path="/" element={<LandingPage />} />
             <Route path="/about" element={<AboutPage />} />
@@ -56,40 +58,46 @@ export function App() {
             <Route path="/register" element={<RegisterPage />} />
           </Route>
 
-          {/* Student Career & Study Portal */}
-          <Route path="/students" element={<StudentLayout />}>
-            <Route index element={<CareerAnalyzerPage />} />
-            <Route path="analyzer" element={<CareerAnalyzerPage />} />
-            <Route path="study-material" element={<StudyMaterialPage />} />
-            <Route path="youtube" element={<YouTubeLecturesPage />} />
-            <Route path="sectors" element={<SectorsGuidePage />} />
+          {/* Student Career & Study Portal - requires authentication */}
+          <Route element={<ProtectedRoute allowedRoles={['student', 'admin', 'farmer']} />}>
+            <Route path="/students" element={<StudentLayout />}>
+              <Route index element={<CareerAnalyzerPage />} />
+              <Route path="analyzer" element={<CareerAnalyzerPage />} />
+              <Route path="study-material" element={<StudyMaterialPage />} />
+              <Route path="youtube" element={<YouTubeLecturesPage />} />
+              <Route path="sectors" element={<SectorsGuidePage />} />
+            </Route>
           </Route>
 
-          {/* Farmer Portal Routes */}
-          <Route path="/farmer" element={<FarmerLayout />}>
-            <Route index element={<FarmerDashboard />} />
-            <Route path="smart-farming" element={<SmartFarmingPage />} />
-            <Route path="disease" element={<DiseaseDetectionPage />} />
-            <Route path="weather" element={<WeatherPage />} />
-            <Route path="irrigation" element={<IrrigationPage />} />
-            <Route path="prices" element={<CropPricesPage />} />
-            <Route path="marketplace" element={<MarketplacePage />} />
-            <Route path="reports" element={<FarmerReportsPage />} />
-            <Route path="profile" element={<FarmerProfilePage />} />
-            <Route path="notifications" element={<NotificationsPage />} />
+          {/* Farmer Portal Routes - requires authentication as farmer or admin */}
+          <Route element={<ProtectedRoute allowedRoles={['farmer', 'admin']} />}>
+            <Route path="/farmer" element={<FarmerLayout />}>
+              <Route index element={<FarmerDashboard />} />
+              <Route path="smart-farming" element={<SmartFarmingPage />} />
+              <Route path="disease" element={<DiseaseDetectionPage />} />
+              <Route path="weather" element={<WeatherPage />} />
+              <Route path="irrigation" element={<IrrigationPage />} />
+              <Route path="prices" element={<CropPricesPage />} />
+              <Route path="marketplace" element={<MarketplacePage />} />
+              <Route path="reports" element={<FarmerReportsPage />} />
+              <Route path="profile" element={<FarmerProfilePage />} />
+              <Route path="notifications" element={<NotificationsPage />} />
+            </Route>
           </Route>
 
-          {/* Admin Portal Routes */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<AdminDashboard />} />
-            <Route path="reports/users" element={<UserReportsPage />} />
-            <Route path="reports/crops" element={<CropReportsPage />} />
-            <Route path="reports/disease" element={<DiseaseReportsPage />} />
-            <Route path="reports/weather" element={<WeatherReportsPage />} />
-            <Route path="reports/irrigation" element={<IrrigationReportsPage />} />
-            <Route path="reports/market" element={<MarketReportsPage />} />
-            <Route path="reports/marketplace" element={<MarketplaceReportsPage />} />
-            <Route path="reports/system" element={<SystemReportsPage />} />
+          {/* Admin Portal Routes - strictly restricted to admin position */}
+          <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="reports/users" element={<UserReportsPage />} />
+              <Route path="reports/crops" element={<CropReportsPage />} />
+              <Route path="reports/disease" element={<DiseaseReportsPage />} />
+              <Route path="reports/weather" element={<WeatherReportsPage />} />
+              <Route path="reports/irrigation" element={<IrrigationReportsPage />} />
+              <Route path="reports/market" element={<MarketReportsPage />} />
+              <Route path="reports/marketplace" element={<MarketplaceReportsPage />} />
+              <Route path="reports/system" element={<SystemReportsPage />} />
+            </Route>
           </Route>
 
           {/* Fallback to Home */}

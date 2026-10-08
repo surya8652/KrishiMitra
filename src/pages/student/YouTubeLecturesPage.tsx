@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { 
-  Youtube, 
+  PlayCircle, 
   Play, 
   ExternalLink, 
   Clock, 
@@ -41,7 +41,7 @@ export const YouTubeLecturesPage: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <div className="p-2 rounded-xl bg-red-100 text-red-700">
-            <Youtube className="h-6 w-6" />
+            <PlayCircle className="h-6 w-6" />
           </div>
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">

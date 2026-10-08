@@ -4,7 +4,7 @@ import {
   GraduationCap, 
   Compass, 
   BookOpen, 
-  Youtube, 
+  PlayCircle, 
   Layers, 
   ArrowLeft, 
   Menu, 
@@ -16,15 +16,17 @@ import {
 import { LanguageSelector } from '@/components/LanguageSelector'
 import { Toast } from '@/components/Toast'
 import { useApp } from '@/context/AppContext'
+import { useNavigate } from 'react-router-dom'
 
 export const StudentLayout: React.FC = () => {
-  const { t, role } = useApp()
+  const { t, role, isAuthenticated, logout } = useApp()
+  const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const navLinks = [
     { to: '/students', label: t.careerAnalyzer, icon: Compass, end: true },
     { to: '/students/study-material', label: t.studyMaterial, icon: BookOpen },
-    { to: '/students/youtube', label: t.youtubeLectures, icon: Youtube },
+    { to: '/students/youtube', label: t.youtubeLectures, icon: PlayCircle },
     { to: '/students/sectors', label: t.sectorGuide, icon: Layers }
   ]
 
@@ -90,15 +92,33 @@ export const StudentLayout: React.FC = () => {
             {/* Language Selector working on this page */}
             <LanguageSelector compact />
 
-            {/* Link back to Farmer Portal */}
-            <Link
-              to="/farmer"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors"
-              title="Switch to Farmer Portal"
-            >
-              <Sprout className="h-3.5 w-3.5 text-emerald-600" />
-              <span>Farmer Portal</span>
-            </Link>
+            {/* Student Auth status & Logout */}
+            {isAuthenticated ? (
+              <div className="flex items-center gap-2">
+                <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                  <GraduationCap className="h-3.5 w-3.5" />
+                  <span>Student Member</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await logout()
+                    navigate('/login')
+                  }}
+                  className="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 hover:text-red-700 hover:bg-red-50 border border-slate-200 transition-colors cursor-pointer"
+                  title="Sign Out"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="text-xs font-bold px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-xs"
+              >
+                Sign In
+              </Link>
+            )}
 
             {/* Link to Home */}
             <Link
@@ -133,14 +153,27 @@ export const StudentLayout: React.FC = () => {
               </NavLink>
             ))}
             <div className="pt-2 border-t border-slate-100 flex items-center justify-between px-3 text-xs">
-              <Link
-                to="/farmer"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-1.5 text-emerald-700 font-bold"
-              >
-                <Sprout className="h-4 w-4" />
-                <span>Switch to Farmer Portal</span>
-              </Link>
+              {isAuthenticated ? (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setMobileMenuOpen(false)
+                    await logout()
+                    navigate('/login')
+                  }}
+                  className="text-red-600 font-bold hover:underline"
+                >
+                  Sign Out
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-indigo-600 font-bold hover:underline"
+                >
+                  Sign In
+                </Link>
+              )}
             </div>
           </div>
         )}
