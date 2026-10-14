@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="min-h-screen bg-agri-bg flex flex-col" style="color:#1E2922;">
+  <!-- Navigation Header -->
+  <header class="sticky top-0 z-40" style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border-bottom:1px solid #E5E7EB;padding:0.75rem 1rem;">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <a href="{{ url_for('landing') }}" class="flex items-center gap-2.5" style="text-decoration:none;">
+        <div style="height:2.25rem;width:2.25rem;border-radius:0.5rem;background:#1B5E20;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 1px 2px rgba(0,0,0,0.05);">
+          <i data-lucide="sprout" style="width:1.25rem;height:1.25rem;"></i>
+        </div>
+        <div>
+          <span style="font-weight:800;font-size:1.25rem;letter-spacing:-0.025em;color:#143E23;">
+            KrishiMitra <span style="font-size:0.75rem;padding:0.125rem 0.375rem;border-radius:0.25rem;background:#E8F5E9;color:#1B5E20;">AI</span>
+          </span>
+        </div>
+      </a>
+
+      <div class="flex items-center gap-3" style="gap:1.25rem;">
+        <!-- Desktop Nav -->
+        <nav class="hidden md:flex items-center gap-5" style="font-size:0.875rem;font-weight:600;color:#374151;">
+          <a href="{{ url_for('landing') }}" style="transition:color 150ms;" onmouseover="this.style.color='#1B5E20'" onmouseout="this.style.color='#374151'">Home</a>
+          <a href="{{ url_for('about') }}" style="transition:color 150ms;" onmouseover="this.style.color='#1B5E20'" onmouseout="this.style.color='#374151'">How It Works</a>
+          <a href="{{ url_for('farmer_dashboard') }}" style="transition:color 150ms;" onmouseover="this.style.color='#1B5E20'" onmouseout="this.style.color='#374151'">Farmer App</a>
+          <a href="{{ url_for('student_career_analyzer') }}" class="flex items-center gap-1.5" style="color:#4338CA;background:#EEF2FF;padding:0.25rem 0.625rem;border-radius:0.5rem;border:1px solid #C7D2FE;">
+            <i data-lucide="graduation-cap" style="width:1rem;height:1rem;"></i>
+            <span>{{ t.get('studentHub', 'Student Hub') }}</span>
+          </a>
+        </nav>
+
+        <!-- Language Selector -->
+        {% include "components/language_selector.html" %}
+
+        <div class="flex items-center gap-2">
+          {% if is_authenticated %}
+            {% if role == 'admin' %}
+              <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary btn-sm">Open Admin Portal</a>
+            {% elif role == 'student' %}
+              <a href="{{ url_for('student_career_analyzer') }}" class="btn btn-primary btn-sm">Open Student Hub</a>
+            {% else %}
+              <a href="{{ url_for('farmer_dashboard') }}" class="btn btn-primary btn-sm">Open Farmer App</a>
+            {% endif %}
+            <a href="{{ url_for('api_logout') }}" style="font-size:0.75rem;font-weight:600;padding:0.5rem 0.625rem;border-radius:0.5rem;color:#4B5563;border:1px solid #E5E7EB;transition:all 150ms;" onmouseover="this.style.color='#B91C1C';this.style.background='#FEF2F2'" onmouseout="this.style.color='#4B5563';this.style.background='transparent'">Sign Out</a>
+          {% else %}
+            <a href="{{ url_for('login') }}" style="font-size:0.75rem;font-weight:700;padding:0.5rem 0.75rem;border-radius:0.5rem;color:#1B5E20;transition:color 150ms;" onmouseover="this.style.background='#E8F5E9'" onmouseout="this.style.background='transparent'">{{ t.get('login', 'Login') }}</a>
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-sm">{{ t.get('getStarted', 'Get Started') }}</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer style="background:#1E2922;color:#D1D5DB;border-top:1px solid #022C22;padding:2.5rem 1rem 2rem;">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8" style="font-size:0.875rem;">
+      <div class="space-y-3">
+        <div class="flex items-center gap-2">
+          <div style="height:1.75rem;width:1.75rem;border-radius:0.375rem;background:#2E7D32;display:flex;align-items:center;justify-content:center;color:#fff;">
+            <i data-lucide="sprout" style="width:1rem;height:1rem;"></i>
+          </div>
+          <span style="font-weight:800;font-size:1.125rem;color:#fff;">KrishiMitra AI</span>
+        </div>
+        <p style="color:#9CA3AF;font-size:0.75rem;line-height:1.625;">
+          Smart Farming. Better Decisions. Stronger Rural Communities.
+          Empowering farmers & rural youth with agricultural intelligence and career roadmaps.
+        </p>
+      </div>
+
+      <div>
+        <h4 style="font-weight:700;color:#fff;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.75rem;">Farmer Services</h4>
+        <ul class="space-y-2" style="font-size:0.75rem;color:#9CA3AF;list-style:none;">
+          <li><a href="{{ url_for('farmer_smart_farming') }}" onmouseover="this.style.color='#34D399'" onmouseout="this.style.color='#9CA3AF'">Crop Health & Disease Check</a></li>
+          <li><a href="{{ url_for('farmer_weather') }}" onmouseover="this.style.color='#34D399'" onmouseout="this.style.color='#9CA3AF'">Rain & Weather Guidance</a></li>
+          <li><a href="{{ url_for('farmer_irrigation') }}" onmouseover="this.style.color='#34D399'" onmouseout="this.style.color='#9CA3AF'">Drip Watering Advice</a></li>
+          <li><a href="{{ url_for('farmer_prices') }}" onmouseover="this.style.color='#34D399'" onmouseout="this.style.color='#9CA3AF'">Live Mandi Prices</a></li>
+          <li><a href="{{ url_for('farmer_marketplace') }}" onmouseover="this.style.color='#34D399'" onmouseout="this.style.color='#9CA3AF'">Farmer-to-Buyer Marketplace</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 style="font-weight:700;color:#fff;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.75rem;">Students & Careers</h4>
+        <ul class="space-y-2" style="font-size:0.75rem;color:#9CA3AF;list-style:none;">
+          <li><a href="{{ url_for('student_career_analyzer') }}" class="flex items-center gap-1.5" style="color:#A5B4FC;font-weight:600;" onmouseover="this.style.color='#818CF8'" onmouseout="this.style.color='#A5B4FC'"><i data-lucide="graduation-cap" style="width:0.875rem;height:0.875rem;"></i><span>Career & Interest Analyzer</span></a></li>
+          <li><a href="{{ url_for('student_study_material') }}" onmouseover="this.style.color='#818CF8'" onmouseout="this.style.color='#9CA3AF'">Study Notes (Architecture, Engineering)</a></li>
+          <li><a href="{{ url_for('student_youtube') }}" onmouseover="this.style.color='#818CF8'" onmouseout="this.style.color='#9CA3AF'">Curated YouTube Lectures</a></li>
+          <li><a href="{{ url_for('student_sectors') }}" onmouseover="this.style.color='#818CF8'" onmouseout="this.style.color='#9CA3AF'">Sectors Guide (B.Arch, B.Tech)</a></li>
+          <li><a href="{{ url_for('about') }}" onmouseover="this.style.color='#34D399'" onmouseout="this.style.color='#9CA3AF'">About the Platform</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 style="font-weight:700;color:#fff;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.75rem;">Support & Standards</h4>
+        <div class="space-y-2" style="font-size:0.75rem;color:#9CA3AF;margin-bottom:0.75rem;">
+          <div class="flex items-center gap-1.5" style="color:#6EE7B7;font-weight:600;">
+            <i data-lucide="phone" style="width:0.875rem;height:0.875rem;"></i>
+            <span>Kisan Helpline: 1800-180-1551</span>
+          </div>
+          <p style="font-size:0.75rem;color:#9CA3AF;line-height:1.625;">
+            Available in 8 regional languages across all pages with offline compatibility.
+          </p>
+        </div>
+        <div class="flex items-center gap-2" style="font-size:0.75rem;font-weight:600;color:#6EE7B7;background:#26372E;padding:0.625rem;border-radius:0.5rem;border:1px solid #334A3E;">
+          <i data-lucide="heart-handshake" style="width:1rem;height:1rem;flex-shrink:0;"></i>
+          <span>Free for all Indian farmers and students</span>
+        </div>
+        <div style="padding-top:0.5rem;">
+          <a href="{{ url_for('login', role='admin', redirect='/admin') }}" style="font-size:11px;color:#6B7280;transition:color 150ms;" onmouseover="this.style.color='#34D399'" onmouseout="this.style.color='#6B7280'">
+            🔒 Directorate & Admin Portal Login →
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto pt-6" style="border-top:1px solid #1F2937;text-align:center;font-size:0.75rem;color:#6B7280;">
+      <p>© {{ year }} KrishiMitra AI • Designed for farmers & students • All rights reserved.</p>
+    </div>
+  </footer>
+</div>
+{% endblock %}

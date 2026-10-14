@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="min-h-screen bg-agri-bg flex flex-col" style="color:#1E2922;">
+  <!-- Farmer Header -->
+  <header class="sticky top-0 z-40" style="background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border-bottom:1px solid #E5E7EB;padding:0.625rem 1rem;box-shadow:0 1px 2px rgba(0,0,0,0.05);">
+    <div class="flex items-center justify-between gap-2 max-w-7xl mx-auto">
+      <!-- Left: Logo -->
+      <div class="flex items-center gap-3">
+        <a href="{{ url_for('farmer_dashboard') }}" class="flex items-center gap-2" style="text-decoration:none;">
+          <div style="height:2.25rem;width:2.25rem;border-radius:0.5rem;background:#1B5E20;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 1px 2px rgba(0,0,0,0.05);">
+            <i data-lucide="sprout" style="width:1.25rem;height:1.25rem;"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span style="font-weight:800;font-size:1.125rem;letter-spacing:-0.025em;color:#143E23;">KrishiMitra</span>
+              <span style="font-size:0.75rem;font-weight:700;padding:0.125rem 0.375rem;border-radius:0.25rem;background:#E8F5E9;color:#1B5E20;">AI</span>
+            </div>
+            <p class="hidden sm:block" style="font-size:10px;color:#6B7280;line-height:1.25;font-weight:500;">{{ t.get('tagline', 'Smart Agriculture Assistant') }}</p>
+          </div>
+        </a>
+      </div>
+
+      <!-- Center: Location Button -->
+      <a href="{{ url_for('farmer_weather') }}" class="flex items-center gap-1.5 cursor-pointer" style="background:#F1F8F3;padding:0.375rem 0.75rem;border-radius:9999px;border:1px solid #C8E6C9;font-size:0.75rem;font-weight:600;color:#1B5E20;">
+        <i data-lucide="map-pin" style="width:0.875rem;height:0.875rem;color:#2E7D32;"></i>
+        <span>{{ farmer.get('district', 'Nashik') }}, {{ farmer.get('state', 'Maharashtra') }}</span>
+        <span style="font-size:10px;background:#fff;color:#1B5E20;padding:0.125rem 0.375rem;border-radius:0.25rem;font-weight:700;border:1px solid #6EE7B7;">Change</span>
+      </a>
+
+      <!-- Right: Actions -->
+      <div class="flex items-center gap-2">
+        <!-- Student Hub Link -->
+        <a href="{{ url_for('student_career_analyzer') }}" class="hidden md:inline-flex items-center gap-1.5" style="padding:0.25rem 0.75rem;border-radius:9999px;font-size:0.75rem;font-weight:700;color:#4338CA;background:#EEF2FF;border:1px solid #C7D2FE;">
+          <i data-lucide="graduation-cap" style="width:0.875rem;height:0.875rem;color:#4F46E5;"></i>
+          <span>Student Hub</span>
+        </a>
+
+        <!-- Kisan Member Badge -->
+        <div class="hidden sm:inline-flex items-center gap-1.5" style="padding:0.25rem 0.625rem;border-radius:9999px;font-size:0.75rem;font-weight:600;background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;">
+          <i data-lucide="user-check" style="width:0.875rem;height:0.875rem;color:#047857;"></i>
+          <span>Kisan Member</span>
+        </div>
+
+        <!-- Logout -->
+        <a href="{{ url_for('api_logout') }}" class="hidden sm:inline-flex items-center gap-1" style="padding:0.25rem 0.625rem;border-radius:0.5rem;font-size:0.75rem;font-weight:600;color:#4B5563;border:1px solid #E5E7EB;transition:all 150ms;" onmouseover="this.style.color='#B91C1C';this.style.background='#FEF2F2'" onmouseout="this.style.color='#4B5563';this.style.background='transparent'">
+          <span>Sign Out</span>
+        </a>
+
+        <!-- Language Selector -->
+        {% include "components/language_selector.html" %}
+
+        <!-- Notifications -->
+        <a href="{{ url_for('farmer_notifications') }}" style="position:relative;padding:0.5rem;border-radius:0.5rem;color:#4B5563;transition:all 150ms;" onmouseover="this.style.background='#F3F4F6'" onmouseout="this.style.background='transparent'" aria-label="View notifications">
+          <i data-lucide="bell" style="width:1.25rem;height:1.25rem;"></i>
+          {% if unread_count > 0 %}
+          <span class="notif-badge">{{ unread_count }}</span>
+          {% endif %}
+        </a>
+
+        <!-- Profile Avatar -->
+        <a href="{{ url_for('farmer_profile') }}" class="flex items-center gap-2" style="padding-left:0.25rem;">
+          <img src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=100&q=80" alt="{{ farmer.get('name', 'Farmer') }}" class="avatar" />
+          <span class="hidden xl:inline" style="font-size:0.75rem;font-weight:700;color:#1F2937;">{{ farmer.get('name', 'Farmer').split(' ')[0] }}</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Body with Sidebar -->
+  <div class="flex-1 flex max-w-7xl w-full mx-auto overflow-hidden">
+    <!-- Desktop Sidebar -->
+    <aside class="hidden lg:block sidebar">
+      <div style="padding:0.75rem;flex:1;overflow-y:auto;" class="space-y-1">
+        <div style="padding:0.375rem 0.75rem;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#9CA3AF;">
+          Farmer Services / सेवा
+        </div>
+
+        {% set sidebar_items = [
+          ('farmer_dashboard', t.get('dashboard', 'Dashboard'), 'home'),
+          ('farmer_smart_farming', t.get('smartFarming', 'Smart Farming'), 'sprout'),
+          ('farmer_disease', t.get('cropHealth', 'Crop Health'), 'scan-search'),
+          ('farmer_weather', t.get('weather', 'Weather'), 'cloud-sun'),
+          ('farmer_irrigation', t.get('irrigation', 'Irrigation'), 'droplet'),
+          ('farmer_prices', t.get('cropPrices', 'Crop Prices'), 'trending-up'),
+          ('farmer_marketplace', t.get('marketplace', 'Marketplace'), 'shopping-bag'),
+          ('farmer_reports', t.get('myReports', 'My Reports'), 'file-text'),
+          ('farmer_profile', t.get('myProfile', 'My Profile'), 'user'),
+          ('farmer_notifications', t.get('notifications', 'Notifications'), 'bell')
+        ] %}
+
+        {% for route, label, icon in sidebar_items %}
+        {% set active = request.path == url_for(route) %}
+        <a href="{{ url_for(route) }}" class="sidebar-link {{ 'active' if active else '' }}">
+          <div class="flex items-center gap-3">
+            <i data-lucide="{{ icon }}" class="sidebar-icon" style="width:1.25rem;height:1.25rem;{{ 'color:#fff;' if active else 'color:#2E7D32;' }}"></i>
+            <span class="truncate">{{ label }}</span>
+          </div>
+          {% if route == 'farmer_notifications' and unread_count > 0 %}
+          <span style="height:1.25rem;min-width:20px;padding:0 0.25rem;border-radius:9999px;background:#EF4444;color:#fff;font-size:0.75rem;display:flex;align-items:center;justify-content:center;font-weight:700;">{{ unread_count }}</span>
+          {% elif active %}
+          <i data-lucide="chevron-right" style="width:1rem;height:1rem;color:#A7F3D0;"></i>
+          {% endif %}
+        </a>
+        {% endfor %}
+      </div>
+
+      <!-- Kisan Helpline Footer -->
+      <div style="padding:0.75rem;border-top:1px solid #F3F4F6;background:#FBF9F5;" class="space-y-2">
+        <div style="padding:0.75rem;border-radius:0.75rem;background:#E8F5E9;border:1px solid #C8E6C9;">
+          <div class="flex items-center gap-2" style="color:#1B5E20;font-weight:700;font-size:0.75rem;">
+            <i data-lucide="phone-call" style="width:1rem;height:1rem;color:#2E7D32;"></i>
+            <span>Kisan Call Centre</span>
+          </div>
+          <p style="font-size:11px;color:#4B5563;margin-top:0.25rem;line-height:1.375;">Toll-Free Agricultural Support</p>
+          <a href="tel:18001801551" style="margin-top:0.375rem;display:inline-block;font-size:0.75rem;font-weight:800;color:#1B5E20;">1800-180-1551</a>
+        </div>
+        <a href="{{ url_for('landing') }}" class="flex items-center justify-center gap-1.5" style="padding:0.5rem;font-size:0.75rem;font-weight:600;color:#6B7280;transition:color 150ms;" onmouseover="this.style.color='#1B5E20'" onmouseout="this.style.color='#6B7280'">
+          <i data-lucide="external-link" style="width:0.875rem;height:0.875rem;"></i>
+          <span>Public Homepage</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto" style="padding:1.5rem 1rem;max-width:64rem;margin:0 auto;width:100%;padding-bottom:6rem;">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="mobile-nav lg:hidden" aria-label="Mobile Bottom Navigation">
+    <div class="mobile-nav-grid">
+      {% set mobile_items = [
+        ('farmer_dashboard', 'Home', 'home'),
+        ('farmer_smart_farming', 'Farm', 'sprout'),
+        ('farmer_weather', 'Weather', 'cloud-sun'),
+        ('farmer_prices', 'Prices', 'trending-up'),
+        ('farmer_profile', 'Profile', 'user')
+      ] %}
+      {% for route, label, icon in mobile_items %}
+      {% set active = request.path == url_for(route) %}
+      <a href="{{ url_for(route) }}" class="mobile-nav-item {{ 'active' if active else '' }}">
+        <div class="mobile-nav-icon-wrap">
+          <i data-lucide="{{ icon }}" style="width:1.25rem;height:1.25rem;{{ 'color:#1B5E20;' if active else 'color:#6B7280;' }}"></i>
+        </div>
+        <span style="margin-top:0.125rem;">{{ label }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </nav>
+</div>
+{% endblock %}

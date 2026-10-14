@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}KrishiMitra AI{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}Smart Farming. Better Decisions. Stronger Rural Communities.{% endblock %}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  {% block head %}{% endblock %}
+</head>
+<body>
+  {% block body %}{% endblock %}
+
+  <!-- Toast notification -->
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+  <div id="toast-container" class="toast-container">
+    {% for message in messages %}
+    <div class="toast-message" onclick="this.remove()">
+      {{ message }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% endwith %}
+
+  <script>
+    // Initialize Lucide icons
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+      // Auto-dismiss toasts
+      const toasts = document.querySelectorAll('.toast-message');
+      toasts.forEach(function(toast) {
+        setTimeout(function() {
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateY(20px)';
+          setTimeout(function() { toast.remove(); }, 400);
+        }, 3800);
+      });
+    });
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
