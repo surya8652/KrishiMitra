@@ -1,0 +1,102 @@
+{% extends "layouts/admin.html" %}
+{% block title %}Farmer Marketplace & Direct Trade Report — KrishiMitra Admin{% endblock %}
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-300 pb-5">
+    <div>
+      <div class="flex items-center gap-2">
+        <span style="font-size:0.75rem;font-weight:700;padding:0.125rem 0.5rem;border-radius:0.25rem;border:1px solid #9CA3AF;color:#374151;background:#fff;">
+          Marketplace Analytics
+        </span>
+        <span style="font-size:0.75rem;color:#6B7280;font-family:monospace;">Zero Commission</span>
+      </div>
+      <h1 style="font-size:1.75rem;font-weight:900;color:#111827;margin-top:0.25rem;">
+        Farmer Marketplace & Direct Trade Report
+      </h1>
+      <p style="font-size:0.875rem;color:#4B5563;">
+        Aggregated harvest listing inventory, trade inquiry metrics, and estimated gross transaction value.
+      </p>
+    </div>
+
+    <div class="flex items-center gap-2 shrink-0">
+      <button
+        type="button"
+        onclick="alert('Exporting direct_trade_report.csv')"
+        style="padding:0.375rem 0.75rem;border-radius:0.375rem;border:1px solid #D1D5DB;background:#fff;font-size:0.75rem;font-weight:700;display:flex;align-items:center;gap:0.375rem;cursor:pointer;color:#374151;"
+      >
+        <i data-lucide="file-spreadsheet" style="width:1rem;height:1rem;color:#1B5E20;"></i>
+        <span>Download CSV</span>
+      </button>
+      <button
+        type="button"
+        onclick="alert('Exporting direct_trade_report.pdf')"
+        style="padding:0.375rem 0.75rem;border-radius:0.375rem;border:none;background:#1B5E20;color:#fff;font-size:0.75rem;font-weight:700;display:flex;align-items:center;gap:0.375rem;cursor:pointer;"
+      >
+        <i data-lucide="download" style="width:1rem;height:1rem;"></i>
+        <span>Download PDF</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    {% set mpstats = [
+      ('Active Harvest Listings', '3,420 Listings', 'Across 62 commodities', 'Live Supply'),
+      ('Gross Trade Inquiries', '8,940 Inquiries', 'Direct farmer-to-buyer calls', '+22.5%'),
+      ('Estimated Trade GMV', '₹18.4 Crore', 'Zero middleman fee extracted', 'Farmer Kept'),
+      ('Organic Produce Share', '18.5%', 'Certified residue-free lots', 'Premium')
+    ] %}
+    {% for lbl, val, sub, bdg in mpstats %}
+    <div style="background:#fff;border-radius:1rem;border:1px solid #E5E7EB;padding:1.25rem;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;">
+        <span style="font-size:0.75rem;font-weight:700;color:#6B7280;text-transform:uppercase;">{{ lbl }}</span>
+        <span style="font-size:0.7rem;font-weight:700;padding:0.125rem 0.375rem;border-radius:0.25rem;background:#DCFCE7;color:#166534;">{{ bdg }}</span>
+      </div>
+      <h3 style="font-size:1.75rem;font-weight:900;color:#111827;margin-top:0.25rem;">{{ val }}</h3>
+      <span style="font-size:0.75rem;color:#6B7280;display:block;margin-top:0.25rem;">{{ sub }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Table -->
+  <div style="background:#fff;border-radius:1rem;border:1px solid #E5E7EB;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.03);" class="space-y-4">
+    <h3 style="font-size:1.125rem;font-weight:800;color:#111827;">
+      Commodity Category Volume & Trade Velocity
+    </h3>
+
+    <div style="overflow-x:auto;">
+      <table style="width:100%;text-align:left;font-size:0.875rem;border-collapse:collapse;">
+        <thead>
+          <tr style="border-bottom:1px solid #F3F4F6;color:#9CA3AF;font-size:0.7rem;font-weight:700;text-transform:uppercase;">
+            <th style="padding:0.625rem 0.75rem;">Commodity Group</th>
+            <th style="padding:0.625rem 0.75rem;">Active Postings</th>
+            <th style="padding:0.625rem 0.75rem;">Gross Trade Volume (Est.)</th>
+            <th style="padding:0.625rem 0.75rem;">Primary Source Belts</th>
+            <th style="padding:0.625rem 0.75rem;text-align:right;">Avg Liquidity Speed</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set cat_rows = [
+            ('Fresh Vegetables (Tomato, Onion, Chili)', '1,540', '₹6.8 Cr', 'Nashik & Pune', '1.8 Days'),
+            ('Oilseeds & Pulses (Soybean, Gram, Tur)', '890', '₹5.4 Cr', 'Latur & Nanded', '3.2 Days'),
+            ('Cereals & Grains (Wheat, Paddy, Millet)', '610', '₹3.9 Cr', 'Ludhiana & Sehore', '4.5 Days'),
+            ('Commercial Cash Crops (Cotton, Cane)', '380', '₹2.3 Cr', 'Rajkot & Baramati', '2.6 Days')
+          ] %}
+          {% for cg, ap, gmv, ps, ls in cat_rows %}
+          <tr style="border-bottom:1px solid #F9FAFB;">
+            <td style="padding:0.75rem;font-weight:700;color:#111827;">{{ cg }}</td>
+            <td style="padding:0.75rem;font-semibold;color:#374151;">{{ ap }}</td>
+            <td style="padding:0.75rem;font-bold;color:#1B5E20;">{{ gmv }}</td>
+            <td style="padding:0.75rem;font-size:0.75rem;color:#4B5563;">{{ ps }}</td>
+            <td style="padding:0.75rem;text-align:right;font-semibold;color:#166534;">{{ ls }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

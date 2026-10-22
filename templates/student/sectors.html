@@ -1,0 +1,210 @@
+{% extends "layouts/student.html" %}
+{% block title %}Sector Guide & Career Dossiers — KrishiMitra AI{% endblock %}
+{% block content %}
+<div class="space-y-8">
+
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div style="padding:0.75rem;border-radius:1rem;background:#EEF2FF;color:#4338CA;">
+        <i data-lucide="layers" style="width:1.75rem;height:1.75rem;"></i>
+      </div>
+      <div>
+        <h1 style="font-size:1.75rem;font-weight:900;color:#0F172A;line-height:1.2;">
+          {{ t.get('sectorGuide', 'Sector Guide') }}
+        </h1>
+        <p style="font-size:0.875rem;color:#64748B;">
+          Complete career guides for Architecture, Specific Engineering streams, and Sciences
+        </p>
+      </div>
+    </div>
+
+    <a href="{{ url_for('student_career_analyzer') }}" style="display:inline-flex;align-items:center;gap:0.375rem;padding:0.5rem 1rem;border-radius:0.5rem;background:#4F46E5;color:#fff;font-size:0.75rem;font-weight:700;text-decoration:none;box-shadow:0 1px 2px rgba(0,0,0,0.05);">
+      <i data-lucide="compass" style="width:0.875rem;height:0.875rem;"></i>
+      <span>Check My Eligibility & Match</span>
+    </a>
+  </div>
+
+  <!-- Sector Navigation Pill Selector -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+    {% for sec in career_sectors %}
+    <button
+      type="button"
+      id="sec-nav-{{ sec.id }}"
+      onclick="selectSector('{{ sec.id }}')"
+      class="sec-nav-btn"
+      style="padding:0.75rem;border-radius:1rem;border:1px solid #CBD5E1;text-align:left;background:#fff;color:#334155;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;min-height:5.5rem;transition:all 0.15s;"
+    >
+      <div style="padding:0.375rem;border-radius:0.5rem;width:fit-content;background:#F1F5F9;color:#4338CA;">
+        <i data-lucide="building-2" style="width:1rem;height:1rem;"></i>
+      </div>
+      <div>
+        <span style="font-weight:800;font-size:0.75rem;display:block;line-height:1.2;">
+          {{ sec.title.split('(')[0] }}
+        </span>
+        <span style="font-size:0.625rem;color:#94A3B8;">
+          {{ sec.category }}
+        </span>
+      </div>
+    </button>
+    {% endfor %}
+  </div>
+
+  <!-- Sector Detailed Dossiers -->
+  {% for sec in career_sectors %}
+  <div
+    id="dossier-{{ sec.id }}"
+    class="sector-dossier"
+    style="display:none;background:#fff;border-radius:1.5rem;border:1px solid #E2E8F0;box-shadow:0 1px 3px rgba(0,0,0,0.05);overflow:hidden;"
+  >
+    <!-- Banner -->
+    <div style="background:linear-gradient(to right, #0F172A, #1E1B4B, #0F172A);padding:1.5rem 2rem;color:#fff;">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div style="display:flex;align-items:flex-start;gap:1rem;">
+          <div style="padding:0.75rem;border-radius:1rem;background:#4F46E5;color:#fff;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+            <i data-lucide="award" style="width:1.75rem;height:1.75rem;"></i>
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.25rem;">
+              <span style="font-size:0.7rem;font-weight:700;padding:0.125rem 0.5rem;border-radius:9999px;background:rgba(99,102,241,0.25);color:#C7D2FE;border:1px solid rgba(165,180,252,0.3);">
+                {{ sec.badge }}
+              </span>
+              <span style="font-size:0.75rem;color:#94A3B8;">
+                Duration: {{ sec.duration }}
+              </span>
+            </div>
+            <h2 style="font-size:1.5rem;font-weight:900;letter-spacing:-0.025em;">{{ sec.title }}</h2>
+            <p style="font-size:0.8125rem;color:#CBD5E1;max-width:40rem;margin-top:0.25rem;">{{ sec.tagline }}</p>
+          </div>
+        </div>
+
+        <!-- Salary Estimate Badge -->
+        <div style="background:rgba(255,255,255,0.08);backdrop-filter:blur(8px);padding:1rem;border-radius:1rem;border:1px solid rgba(255,255,255,0.15);text-align:right;flex-shrink:0;">
+          <span style="font-size:0.625rem;font-weight:700;text-transform:uppercase;color:#C7D2FE;display:block;">Typical Compensation</span>
+          <span style="font-size:1.25rem;font-weight:900;color:#34D399;">{{ sec.averageSalary }}</span>
+          <span style="font-size:0.7rem;color:#CBD5E1;display:block;">Growth: {{ sec.growthOutlook }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dossier Content Grid -->
+    <div style="padding:1.5rem;display:flex;flex-direction:column;gap:1.5rem;">
+      <!-- Overview & Mathematics Fit -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:1rem;">
+        <div style="background:#F8FAFC;padding:1.25rem;border-radius:1rem;border:1px solid #E2E8F0;">
+          <h4 style="font-weight:800;font-size:0.9375rem;color:#0F172A;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.375rem;">
+            <i data-lucide="book-open" style="width:1rem;height:1rem;color:#4F46E5;"></i>
+            <span>Domain Overview</span>
+          </h4>
+          <p style="font-size:0.8125rem;color:#475569;line-height:1.5;">{{ sec.description }}</p>
+        </div>
+
+        <div style="background:#EEF2FF;padding:1.25rem;border-radius:1rem;border:1px solid #C7D2FE;">
+          <h4 style="font-weight:800;font-size:0.9375rem;color:#312E81;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.375rem;">
+            <i data-lucide="sparkles" style="width:1rem;height:1rem;color:#4338CA;"></i>
+            <span>Mathematics & Spatial Fit</span>
+          </h4>
+          <p style="font-size:0.8125rem;color:#3730A3;line-height:1.5;">{{ sec.mathProfileFit }}</p>
+        </div>
+      </div>
+
+      <!-- Entrance Exams & Top Colleges -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:1rem;">
+        <div style="border:1px solid #E2E8F0;border-radius:1rem;padding:1.25rem;">
+          <h4 style="font-weight:800;font-size:0.875rem;color:#0F172A;margin-bottom:0.75rem;text-transform:uppercase;color:#475569;">
+            Top National Entrance Exams
+          </h4>
+          <div style="display:flex;flex-wrap:wrap;gap:0.375rem;">
+            {% for exam in sec.entranceExams %}
+            <span style="padding:0.25rem 0.625rem;border-radius:0.5rem;background:#F1F5F9;color:#1E293B;font-weight:700;font-size:0.75rem;border:1px solid #CBD5E1;">
+              {{ exam }}
+            </span>
+            {% endfor %}
+          </div>
+          <p style="font-size:0.75rem;color:#64748B;margin-top:0.75rem;">Eligibility: {{ sec.eligibility }}</p>
+        </div>
+
+        <div style="border:1px solid #E2E8F0;border-radius:1rem;padding:1.25rem;">
+          <h4 style="font-weight:800;font-size:0.875rem;color:#0F172A;margin-bottom:0.75rem;text-transform:uppercase;color:#475569;">
+            Premier Institutes & Colleges
+          </h4>
+          <ul style="padding-left:1.25rem;margin:0;font-size:0.8125rem;color:#334155;line-height:1.5;">
+            {% for col in sec.topColleges %}
+            <li>{{ col }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+
+      <!-- 5-Year Educational Roadmap -->
+      <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:1rem;padding:1.25rem;">
+        <h4 style="font-weight:800;font-size:0.9375rem;color:#0F172A;margin-bottom:1rem;display:flex;align-items:center;gap:0.375rem;">
+          <i data-lucide="compass" style="width:1rem;height:1rem;color:#4F46E5;"></i>
+          <span>Academic & Career Milestones</span>
+        </h4>
+        <div class="space-y-3">
+          {% for step in sec.roadmap %}
+          <div style="display:flex;align-items:flex-start;gap:0.75rem;">
+            <div style="height:1.75rem;width:1.75rem;border-radius:9999px;background:#EEF2FF;color:#4338CA;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.75rem;flex-shrink:0;">
+              {{ loop.index }}
+            </div>
+            <div>
+              <span style="font-weight:700;font-size:0.875rem;color:#0F172A;display:block;">{{ step.phase }}</span>
+              <span style="font-size:0.75rem;color:#475569;">{{ step.focus }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div style="display:flex;align-items:center;justify-content:flex-end;gap:0.75rem;padding-top:1rem;border-top:1px solid #E2E8F0;flex-wrap:wrap;">
+        <a href="{{ url_for('student_study_material') }}?sector={{ sec.id }}" style="padding:0.5rem 1rem;border-radius:0.5rem;background:#0F172A;color:#fff;font-size:0.75rem;font-weight:700;text-decoration:none;">
+          View {{ sec.title.split('(')[0] }} Notes
+        </a>
+        <a href="{{ url_for('student_youtube') }}?sector={{ sec.id }}" style="padding:0.5rem 1rem;border-radius:0.5rem;background:#DC2626;color:#fff;font-size:0.75rem;font-weight:700;text-decoration:none;">
+          Watch Video Lectures
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+</div>
+
+<script>
+function selectSector(sid) {
+  document.querySelectorAll('.sector-dossier').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.sec-nav-btn').forEach(btn => {
+    btn.style.background = '#fff';
+    btn.style.borderColor = '#CBD5E1';
+    btn.style.color = '#334155';
+    const ic = btn.querySelector('div');
+    if (ic) {
+      ic.style.background = '#F1F5F9';
+      ic.style.color = '#4338CA';
+    }
+  });
+
+  const activeDossier = document.getElementById('dossier-' + sid);
+  if (activeDossier) activeDossier.style.display = 'block';
+
+  const activeBtn = document.getElementById('sec-nav-' + sid);
+  if (activeBtn) {
+    activeBtn.style.background = '#0F172A';
+    activeBtn.style.borderColor = '#0F172A';
+    activeBtn.style.color = '#fff';
+    const ic = activeBtn.querySelector('div');
+    if (ic) {
+      ic.style.background = 'rgba(255,255,255,0.2)';
+      ic.style.color = '#fff';
+    }
+  }
+}
+
+// Default to first sector
+document.addEventListener('DOMContentLoaded', () => {
+  selectSector('architecture');
+});
+</script>
+{% endblock %}

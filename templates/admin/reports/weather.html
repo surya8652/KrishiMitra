@@ -1,0 +1,127 @@
+{% extends "layouts/admin.html" %}
+{% block title %}Agro-Meteorological & Alerts Report — KrishiMitra Admin{% endblock %}
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-300 pb-5">
+    <div>
+      <div class="flex items-center gap-2">
+        <span style="font-size:0.75rem;font-weight:700;padding:0.125rem 0.5rem;border-radius:0.25rem;border:1px solid #9CA3AF;color:#374151;background:#fff;">
+          Weather Intelligence
+        </span>
+        <span style="font-size:0.75rem;color:#6B7280;font-family:monospace;">Radar Telemetry</span>
+      </div>
+      <h1 style="font-size:1.75rem;font-weight:900;color:#111827;margin-top:0.25rem;">
+        Agro-Meteorological & Alerts Report
+      </h1>
+      <p style="font-size:0.875rem;color:#4B5563;">
+        Regional weather intelligence, automated farmer alert dispatch records, and moisture telemetry.
+      </p>
+    </div>
+
+    <div class="flex items-center gap-2 shrink-0">
+      <button
+        type="button"
+        onclick="alert('Exporting weather_alerts.csv')"
+        style="padding:0.375rem 0.75rem;border-radius:0.375rem;border:1px solid #D1D5DB;background:#fff;font-size:0.75rem;font-weight:700;display:flex;align-items:center;gap:0.375rem;cursor:pointer;color:#374151;"
+      >
+        <i data-lucide="file-spreadsheet" style="width:1rem;height:1rem;color:#1B5E20;"></i>
+        <span>Download CSV</span>
+      </button>
+      <button
+        type="button"
+        onclick="alert('Exporting weather_alerts.pdf')"
+        style="padding:0.375rem 0.75rem;border-radius:0.375rem;border:none;background:#1B5E20;color:#fff;font-size:0.75rem;font-weight:700;display:flex;align-items:center;gap:0.375rem;cursor:pointer;"
+      >
+        <i data-lucide="download" style="width:1rem;height:1rem;"></i>
+        <span>Download PDF</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Filter Controls -->
+  <div style="background:#fff;padding:1rem;border-radius:1rem;border:1px solid #E5E7EB;box-shadow:0 1px 2px rgba(0,0,0,0.02);display:flex;flex-wrap:wrap;align-items:center;gap:1rem;font-size:0.75rem;">
+    <div style="display:flex;align-items:center;gap:0.375rem;">
+      <i data-lucide="calendar" style="width:1rem;height:1rem;color:#9CA3AF;"></i>
+      <span style="font-weight:700;color:#374151;">Date Range:</span>
+      <select style="height:2.25rem;border-radius:0.5rem;border:1px solid #D1D5DB;padding:0 0.5rem;background:#fff;">
+        <option>Last 30 Days</option>
+        <option>Today (Live Radar)</option>
+        <option>Last 7 Days</option>
+      </select>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:0.375rem;">
+      <i data-lucide="cloud-rain" style="width:1rem;height:1rem;color:#9CA3AF;"></i>
+      <span style="font-weight:700;color:#374151;">Alert Type:</span>
+      <select style="height:2.25rem;border-radius:0.5rem;border:1px solid #D1D5DB;padding:0 0.5rem;background:#fff;">
+        <option>All Warnings</option>
+        <option>Thunderstorms</option>
+        <option>High Humidity</option>
+        <option>Dry Spell</option>
+        <option>Night Frost</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    {% set wstats = [
+      ('Active Regional Alerts', '14 Districts', 'Nashik & Niphad storm warnings', 'Live Radar'),
+      ('Alerts Dispatched', '284,500', 'SMS, push & morning advisory', 'Broadcasted'),
+      ('Postponed Sprays Logged', '12,420', 'Prevented chemical wash-off loss', 'Saved ₹2.4 Cr'),
+      ('Avg Rain Accuracy (24h)', '89.5%', 'Telemetry backed by IMD radar', 'High Confidence')
+    ] %}
+    {% for lbl, val, sub, bdg in wstats %}
+    <div style="background:#fff;border-radius:1rem;border:1px solid #E5E7EB;padding:1.25rem;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;">
+        <span style="font-size:0.75rem;font-weight:700;color:#6B7280;text-transform:uppercase;">{{ lbl }}</span>
+        <span style="font-size:0.7rem;font-weight:700;padding:0.125rem 0.375rem;border-radius:0.25rem;background:#E0F2FE;color:#0369A1;">{{ bdg }}</span>
+      </div>
+      <h3 style="font-size:1.75rem;font-weight:900;color:#111827;margin-top:0.25rem;">{{ val }}</h3>
+      <span style="font-size:0.75rem;color:#6B7280;display:block;margin-top:0.25rem;">{{ sub }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Table -->
+  <div style="background:#fff;border-radius:1rem;border:1px solid #E5E7EB;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.03);" class="space-y-4">
+    <h3 style="font-size:1.125rem;font-weight:800;color:#111827;">
+      Regional Weather Alert Generation Log
+    </h3>
+
+    <div style="overflow-x:auto;">
+      <table style="width:100%;text-align:left;font-size:0.875rem;border-collapse:collapse;">
+        <thead>
+          <tr style="border-bottom:1px solid #F3F4F6;color:#9CA3AF;font-size:0.7rem;font-weight:700;text-transform:uppercase;">
+            <th style="padding:0.625rem 0.75rem;">Weather Event</th>
+            <th style="padding:0.625rem 0.75rem;">Impacted Belt</th>
+            <th style="padding:0.625rem 0.75rem;">Targeted Farmers</th>
+            <th style="padding:0.625rem 0.75rem;">Dispatched Recommendation</th>
+            <th style="padding:0.625rem 0.75rem;text-align:right;">Observation Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set alerts = [
+            ('Thunderstorm & Heavy Showers (18-25mm)', 'North Maharashtra (Nashik/Niphad)', '38,200', 'Postpone Drip & Fungicide Spraying', '04-05 Oct 2026'),
+            ('High Relative Humidity (>85%)', 'Western Maharashtra (Pune/Satara)', '24,500', 'Scout for Downy Mildew Sporulation', '01-03 Oct 2026'),
+            ('Extended Dry Spell (7 Days)', 'Marathwada (Latur/Beed)', '19,800', 'Conserve Moisture via Plastic Mulch', '22-29 Sep 2026'),
+            ('Sudden Night Temperature Drop (16°C)', 'Punjab (Ludhiana/Karnal)', '14,200', 'Foliar Zinc & Potassium spray', '24 Sep 2026')
+          ] %}
+          {% for ev, rg, tf, dr, od in alerts %}
+          <tr style="border-bottom:1px solid #F9FAFB;">
+            <td style="padding:0.75rem;font-weight:700;color:#111827;">{{ ev }}</td>
+            <td style="padding:0.75rem;font-size:0.75rem;color:#4B5563;">{{ rg }}</td>
+            <td style="padding:0.75rem;font-weight:600;color:#111827;">{{ tf }}</td>
+            <td style="padding:0.75rem;font-size:0.75rem;color:#92400E;font-weight:600;">{{ dr }}</td>
+            <td style="padding:0.75rem;text-align:right;font-family:monospace;font-size:0.75rem;color:#6B7280;">{{ od }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

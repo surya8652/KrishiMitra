@@ -1,0 +1,295 @@
+{% extends "layouts/public.html" %}
+{% block title %}Register — KrishiMitra AI{% endblock %}
+{% block content %}
+<div style="min-height:80vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;">
+  <div style="width:100%;max-width:32rem;">
+
+    <!-- Back + Language -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding:0 0.25rem;">
+      <a href="{{ url_for('landing') }}" style="font-size:0.75rem;font-weight:600;color:#6B7280;display:flex;align-items:center;gap:0.25rem;" onmouseover="this.style.color='#1B5E20'" onmouseout="this.style.color='#6B7280'">
+        ← {{ t.get('backToHome','Back to Home') }}
+      </a>
+      {% include "components/language_selector.html" %}
+    </div>
+
+    <!-- STEP 1 CARD -->
+    <div id="step1Card" style="background:#fff;border:1px solid #D1D5DB;border-radius:1rem;box-shadow:0 4px 24px rgba(0,0,0,0.08);overflow:hidden;">
+      <div style="padding:1.5rem 1.5rem 1rem;text-align:center;">
+        <div id="regIcon" style="width:3rem;height:3rem;border-radius:0.875rem;background:#1B5E20;color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 0.625rem;box-shadow:0 2px 6px rgba(0,0,0,0.12);">
+          <i data-lucide="sprout" style="width:1.5rem;height:1.5rem;"></i>
+        </div>
+        <h1 id="regTitle" style="font-size:1.4rem;font-weight:700;color:#111827;margin-bottom:0.25rem;">Create Farmer Account</h1>
+        <p style="font-size:0.75rem;color:#9CA3AF;margin-bottom:1rem;">Join thousands of farmers and students across rural and urban India</p>
+
+        <!-- Role toggle -->
+        <div style="margin-bottom:0.75rem;">
+          <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#9CA3AF;margin-bottom:0.5rem;text-align:left;">I want to register as:</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;padding:0.25rem;background:#F3F4F6;border-radius:0.875rem;">
+            <button type="button" id="regFarmerBtn" onclick="setRegRole('farmer')"
+              style="display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.5rem;border-radius:0.625rem;font-size:0.75rem;font-weight:700;cursor:pointer;border:none;background:#fff;color:#1B5E20;box-shadow:0 1px 2px rgba(0,0,0,0.08);transition:all 150ms;">
+              <i data-lucide="sprout" style="width:1rem;height:1rem;"></i>
+              <span>Farmer (शेतकरी)</span>
+            </button>
+            <button type="button" id="regStudentBtn" onclick="setRegRole('student')"
+              style="display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.5rem;border-radius:0.625rem;font-size:0.75rem;font-weight:700;cursor:pointer;border:none;background:transparent;color:#6B7280;transition:all 150ms;">
+              <i data-lucide="graduation-cap" style="width:1rem;height:1rem;"></i>
+              <span>Student (विद्यार्थी)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step progress -->
+        <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;margin-top:0.5rem;">
+          <span id="dot1" style="height:0.5rem;width:2rem;border-radius:9999px;background:#1B5E20;"></span>
+          <span id="dot2" style="height:0.5rem;width:2rem;border-radius:9999px;background:#E5E7EB;"></span>
+        </div>
+      </div>
+
+      <div style="padding:0 1.5rem 1.5rem;">
+        <form id="step1Form" onsubmit="goStep2(event)" class="space-y-4">
+          <div>
+            <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.25rem;">Your Full Name</label>
+            <div style="position:relative;">
+              <span style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:#9CA3AF;"><i data-lucide="user" style="width:1rem;height:1rem;"></i></span>
+              <input type="text" id="s1Name" name="name" placeholder="e.g. Ramesh Singh / Rajesh Patil" required style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem 0 2.5rem;font-size:0.875rem;box-sizing:border-box;"/>
+            </div>
+          </div>
+          <div>
+            <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.25rem;">Mobile Number</label>
+            <div style="position:relative;">
+              <span style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:#9CA3AF;"><i data-lucide="phone" style="width:1rem;height:1rem;"></i></span>
+              <input type="tel" id="s1Phone" name="phone" placeholder="10-digit mobile number (e.g. 9822045678)" required style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem 0 2.5rem;font-size:0.875rem;box-sizing:border-box;"/>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+            <div>
+              <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.25rem;">State / राज्य</label>
+              <select name="state" id="s1State" onchange="updateDistricts()" style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;background:#fff;box-sizing:border-box;">
+                {% for st in all_india_states %}
+                <option value="{{ st.name }}" {% if st.name == 'Maharashtra' %}selected{% endif %}>{{ st.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.25rem;">District / जिल्हा</label>
+              <select name="district" id="s1District" style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;background:#fff;box-sizing:border-box;">
+                {% for st in all_india_states %}{% if st.name == 'Maharashtra' %}{% for d in st.districts %}<option value="{{ d.name }}">{{ d.name }}</option>{% endfor %}{% endif %}{% endfor %}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.25rem;">Preferred Language</label>
+            <select name="prefLang" style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;background:#fff;box-sizing:border-box;">
+              {% for l in supported_languages %}
+              <option value="{{ l.code }}" {% if l.code == lang %}selected{% endif %}>{{ l.nativeName }} ({{ l.label }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.25rem;">Create Password</label>
+            <div style="position:relative;">
+              <span style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:#9CA3AF;"><i data-lucide="lock" style="width:1rem;height:1rem;"></i></span>
+              <input type="password" id="s1Pass" name="password" placeholder="Minimum 6 characters" required style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem 0 2.5rem;font-size:0.875rem;box-sizing:border-box;"/>
+            </div>
+          </div>
+          <button type="submit" id="step1Btn" style="width:100%;height:2.75rem;border-radius:0.75rem;border:none;background:#1B5E20;color:#fff;font-size:0.875rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;">
+            <span>Continue to Step 2</span>
+            <i data-lucide="arrow-right" style="width:1rem;height:1rem;"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- STEP 2 CARD (hidden) -->
+    <div id="step2Card" style="display:none;background:#fff;border:1px solid #D1D5DB;border-radius:1rem;box-shadow:0 4px 24px rgba(0,0,0,0.08);overflow:hidden;">
+      <div style="padding:1.5rem 1.5rem 1rem;text-align:center;">
+        <div id="regIcon2" style="width:3rem;height:3rem;border-radius:0.875rem;background:#1B5E20;color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 0.625rem;">
+          <i data-lucide="sprout" style="width:1.5rem;height:1.5rem;"></i>
+        </div>
+        <h2 id="step2Title" style="font-size:1.3rem;font-weight:700;color:#111827;margin-bottom:0.25rem;">Tell Us About Your Farm</h2>
+        <p style="font-size:0.75rem;color:#9CA3AF;margin-bottom:0.75rem;">Localize weather, soil advice, and mandi intelligence</p>
+        <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;">
+          <span style="height:0.5rem;width:2rem;border-radius:9999px;background:#1B5E20;"></span>
+          <span style="height:0.5rem;width:2rem;border-radius:9999px;background:#1B5E20;"></span>
+        </div>
+      </div>
+
+      <div style="padding:0 1.5rem 1.5rem;">
+        <!-- FARMER STEP 2 -->
+        <form id="farmerStep2" method="POST" action="{{ url_for('api_register') }}" class="space-y-4">
+          <input type="hidden" name="role" value="farmer" />
+          <input type="hidden" name="name" id="hiddenName" />
+          <input type="hidden" name="phone" id="hiddenPhone" />
+          <input type="hidden" name="state" id="hiddenState" />
+          <input type="hidden" name="district" id="hiddenDistrict" />
+          <div>
+            <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.25rem;">Village / Town Name</label>
+            <input type="text" name="village" placeholder="e.g. Dindori, Pimpalgaon, Khanna" style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;box-sizing:border-box;"/>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+            <div>
+              <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.25rem;">Land Size</label>
+              <input type="number" name="landSize" step="0.5" placeholder="e.g. 2" value="2" style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;box-sizing:border-box;"/>
+            </div>
+            <div>
+              <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.25rem;">Unit</label>
+              <select name="landUnit" style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;background:#fff;box-sizing:border-box;">
+                <option value="acres">Acres (एकड)</option>
+                <option value="hectares">Hectares (हेक्टर)</option>
+                <option value="bigha">Bigha (बीघा)</option>
+                <option value="guntha">Guntha (गुंठा)</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.25rem;">Soil Type in your Field</label>
+            <select name="soilType" style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;background:#fff;box-sizing:border-box;">
+              <option>Medium Black Clayey Loam (काळी माती)</option>
+              <option>Deep Black Cotton Soil</option>
+              <option>Fertile Alluvial Loam (गाळाची माती)</option>
+              <option>Red Loamy Soil (तांबडी माती)</option>
+              <option>Sandy Desert Loam</option>
+              <option>Laterite Mountain Soil</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.25rem;">Primary Sown Crop</label>
+            <input type="text" name="mainCrop" placeholder="e.g. Tomato, Onion, Wheat, Rice, Cotton, Soybean" value="Tomato" style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;box-sizing:border-box;"/>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.5rem;padding-top:0.5rem;">
+            <button type="submit" style="width:100%;height:2.75rem;border-radius:0.75rem;border:none;background:#1B5E20;color:#fff;font-size:0.875rem;font-weight:700;cursor:pointer;">Complete Farmer Registration</button>
+            <button type="button" onclick="goStep2Skip()" style="width:100%;padding:0.5rem;border:none;background:none;font-size:0.75rem;color:#9CA3AF;cursor:pointer;">Skip farm details for now</button>
+          </div>
+        </form>
+
+        <!-- STUDENT STEP 2 -->
+        <form id="studentStep2" method="POST" action="{{ url_for('api_register') }}" class="space-y-4" style="display:none;">
+          <input type="hidden" name="role" value="student" />
+          <input type="hidden" name="name" id="hiddenNameS" />
+          <input type="hidden" name="phone" id="hiddenPhoneS" />
+          <input type="hidden" name="state" id="hiddenStateS" />
+          <input type="hidden" name="district" id="hiddenDistrictS" />
+          <div>
+            <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.25rem;">Current Class / Level</label>
+            <select name="classLevel" style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;background:#fff;box-sizing:border-box;">
+              <option>Class 10 (Secondary School)</option>
+              <option>Class 11 (Junior College / High School)</option>
+              <option selected>Class 12 (Board Prep / Senior School)</option>
+              <option>Polytechnic / Diploma</option>
+              <option>Undergraduate (B.Tech / B.Sc / B.Arch)</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.25rem;">Academic Stream</label>
+            <select name="stream" style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;background:#fff;box-sizing:border-box;">
+              <option>Science - Physics, Chemistry, Maths (PCM)</option>
+              <option>Science - Physics, Chemistry, Biology (PCB)</option>
+              <option>Science - Both Maths &amp; Biology (PCMB)</option>
+              <option>Commerce with Maths</option>
+              <option>Arts / Humanities with Design</option>
+              <option>Diploma in Engineering / Architectural Draughtsman</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.25rem;">Primary Target Career Interest</label>
+            <select name="targetCareer" style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;background:#fff;box-sizing:border-box;">
+              <option>Architecture (B.Arch) &amp; Building Design (NATA / JEE Paper 2)</option>
+              <option>Civil &amp; Structural Engineering (JEE / MHT-CET)</option>
+              <option>Computer Science &amp; AI Engineering</option>
+              <option>Agricultural Engineering &amp; Agritech</option>
+              <option>Mechanical &amp; Robotics Engineering</option>
+              <option>Pure Mathematics &amp; Data Science</option>
+            </select>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.5rem;padding-top:0.5rem;">
+            <button type="submit" style="width:100%;height:2.75rem;border-radius:0.75rem;border:none;background:#4F46E5;color:#fff;font-size:0.875rem;font-weight:700;cursor:pointer;">Complete Student Registration</button>
+            <button type="button" onclick="goStep2Skip()" style="width:100%;padding:0.5rem;border:none;background:none;font-size:0.75rem;color:#9CA3AF;cursor:pointer;">Skip stream details for now</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <p style="text-align:center;font-size:0.75rem;color:#9CA3AF;margin-top:1rem;">
+      Already have an account?
+      <a href="{{ url_for('login') }}" style="font-weight:700;color:#1B5E20;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Sign In here</a>
+    </p>
+  </div>
+</div>
+
+<script>
+// Store all-india states data for district update
+const statesData = {{ all_india_states | tojson }};
+let currentRegRole = 'farmer';
+
+function setRegRole(role) {
+  currentRegRole = role;
+  const isFarmer = role === 'farmer';
+  const color = isFarmer ? '#1B5E20' : '#4F46E5';
+  document.getElementById('regIcon').style.background = color;
+  document.getElementById('regIcon').querySelector('i').setAttribute('data-lucide', isFarmer ? 'sprout' : 'graduation-cap');
+  document.getElementById('regTitle').textContent = isFarmer ? 'Create Farmer Account' : 'Create Student Account';
+  document.getElementById('step1Btn').style.background = color;
+  document.getElementById('dot1').style.background = color;
+
+  document.getElementById('regFarmerBtn').style.background = isFarmer ? '#fff' : 'transparent';
+  document.getElementById('regFarmerBtn').style.color = isFarmer ? '#1B5E20' : '#6B7280';
+  document.getElementById('regFarmerBtn').style.boxShadow = isFarmer ? '0 1px 2px rgba(0,0,0,0.08)' : 'none';
+  document.getElementById('regStudentBtn').style.background = !isFarmer ? '#fff' : 'transparent';
+  document.getElementById('regStudentBtn').style.color = !isFarmer ? '#4F46E5' : '#6B7280';
+  document.getElementById('regStudentBtn').style.boxShadow = !isFarmer ? '0 1px 2px rgba(0,0,0,0.08)' : 'none';
+
+  if (window.lucide) lucide.createIcons();
+}
+
+function updateDistricts() {
+  const stateName = document.getElementById('s1State').value;
+  const stObj = statesData.find(s => s.name === stateName);
+  const distSelect = document.getElementById('s1District');
+  distSelect.innerHTML = '';
+  if (stObj && stObj.districts) {
+    stObj.districts.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d.name;
+      opt.textContent = d.name;
+      distSelect.appendChild(opt);
+    });
+  }
+}
+
+function goStep2(e) {
+  e.preventDefault();
+  const name = document.getElementById('s1Name').value;
+  const phone = document.getElementById('s1Phone').value;
+  const pass = document.getElementById('s1Pass').value;
+  const state = document.getElementById('s1State').value;
+  const district = document.getElementById('s1District').value;
+
+  if (!name || !phone || !pass) { alert('Please fill in name, mobile number and password'); return; }
+
+  // Populate hidden fields
+  ['hiddenName','hiddenNameS'].forEach(id => { const el = document.getElementById(id); if(el) el.value = name; });
+  ['hiddenPhone','hiddenPhoneS'].forEach(id => { const el = document.getElementById(id); if(el) el.value = phone; });
+  ['hiddenState','hiddenStateS'].forEach(id => { const el = document.getElementById(id); if(el) el.value = state; });
+  ['hiddenDistrict','hiddenDistrictS'].forEach(id => { const el = document.getElementById(id); if(el) el.value = district; });
+
+  const isFarmer = currentRegRole === 'farmer';
+  const color = isFarmer ? '#1B5E20' : '#4F46E5';
+
+  document.getElementById('step2Title').textContent = isFarmer ? 'Tell Us About Your Farm' : 'Your Academic Stream & Goals';
+  document.getElementById('regIcon2').style.background = color;
+  document.getElementById('regIcon2').querySelector('i').setAttribute('data-lucide', isFarmer ? 'sprout' : 'graduation-cap');
+  document.getElementById('farmerStep2').style.display = isFarmer ? 'block' : 'none';
+  document.getElementById('studentStep2').style.display = isFarmer ? 'none' : 'block';
+
+  document.getElementById('step1Card').style.display = 'none';
+  document.getElementById('step2Card').style.display = 'block';
+  if (window.lucide) lucide.createIcons();
+}
+
+function goStep2Skip() {
+  const isFarmer = currentRegRole === 'farmer';
+  const form = isFarmer ? document.getElementById('farmerStep2') : document.getElementById('studentStep2');
+  form.submit();
+}
+</script>
+{% endblock %}

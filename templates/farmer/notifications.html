@@ -1,0 +1,176 @@
+{% extends "layouts/farmer.html" %}
+{% block title %}Notifications & Alerts — KrishiMitra AI{% endblock %}
+{% block content %}
+<div class="space-y-6 max-w-3xl mx-auto">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-200 pb-4">
+    <div class="flex items-center gap-2">
+      <div style="padding:0.5rem;border-radius:0.5rem;background:#E8F5E9;color:#1B5E20;">
+        <i data-lucide="bell" style="width:1.5rem;height:1.5rem;"></i>
+      </div>
+      <div>
+        <h1 style="font-size:1.5rem;line-height:2rem;font-weight:800;color:#111827;">
+          Notifications & Alerts
+        </h1>
+        <p style="font-size:0.875rem;color:#4B5563;">
+          Real-time weather warnings, irrigation reminders, and price changes.
+        </p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <a
+        href="{{ url_for('api_mark_all_read') }}"
+        style="padding:0.375rem 0.75rem;border-radius:0.5rem;border:1px solid #D1D5DB;background:#fff;font-size:0.75rem;font-weight:700;display:flex;align-items:center;gap:0.375rem;cursor:pointer;color:#374151;text-decoration:none;"
+      >
+        <i data-lucide="check-check" style="width:1rem;height:1rem;"></i>
+        <span>Mark All Read</span>
+      </a>
+
+      <button
+        type="button"
+        onclick="toggleNotifSettings()"
+        style="padding:0.375rem 0.75rem;border-radius:0.5rem;border:1px solid #D1D5DB;background:#fff;font-size:0.75rem;font-weight:700;display:flex;align-items:center;gap:0.375rem;cursor:pointer;color:#374151;"
+      >
+        <i data-lucide="sliders" style="width:1rem;height:1rem;"></i>
+        <span>Settings</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Optional Notification Settings Panel -->
+  <div id="notif-settings-panel" style="display:none;padding:1.25rem;border-radius:1rem;background:#fff;border:1px solid #E5E7EB;box-shadow:0 1px 3px rgba(0,0,0,0.05);margin-bottom:1rem;">
+    <h3 style="font-weight:700;font-size:1rem;color:#111827;margin-bottom:0.75rem;">Notification Delivery Channels</h3>
+    <div style="display:flex;flex-direction:column;gap:0.75rem;">
+      <label style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem;border-radius:0.75rem;background:#F8F9F5;border:1px solid #E5E7EB;cursor:pointer;">
+        <div>
+          <span style="font-weight:700;font-size:0.875rem;color:#111827;display:block;">Instant SMS for Weather Storm Warnings</span>
+          <span style="font-size:0.75rem;color:#6B7280;">Delivered directly to {{ farmer.get('phone', '+91 98220 12345') }}</span>
+        </div>
+        <input type="checkbox" checked style="width:1.25rem;height:1.25rem;accent-color:#1B5E20;cursor:pointer;" />
+      </label>
+
+      <label style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem;border-radius:0.75rem;background:#F8F9F5;border:1px solid #E5E7EB;cursor:pointer;">
+        <div>
+          <span style="font-weight:700;font-size:0.875rem;color:#111827;display:block;">Automated Morning Voice Call Reminder</span>
+          <span style="font-size:0.75rem;color:#6B7280;">Regional language morning summary at 7:00 AM</span>
+        </div>
+        <input type="checkbox" checked style="width:1.25rem;height:1.25rem;accent-color:#1B5E20;cursor:pointer;" />
+      </label>
+
+      <label style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem;border-radius:0.75rem;background:#F8F9F5;border:1px solid #E5E7EB;cursor:pointer;">
+        <div>
+          <span style="font-weight:700;font-size:0.875rem;color:#111827;display:block;">APMC Mandi Price Spike Alerts</span>
+          <span style="font-size:0.75rem;color:#6B7280;">Alert when market prices fluctuate by more than 10%</span>
+        </div>
+        <input type="checkbox" checked style="width:1.25rem;height:1.25rem;accent-color:#1B5E20;cursor:pointer;" />
+      </label>
+    </div>
+  </div>
+
+  <!-- Notification Cards -->
+  <div class="space-y-3">
+    {% for n in notifications %}
+    {% set is_unread = not n.get('read') %}
+    {% set ntype = n.get('type', 'general') %}
+
+    {% if ntype == 'weather' %}
+      {% set card_bg = '#F0F9FF' %}
+      {% set card_border = '#BAE6FD' %}
+      {% set icon_color = '#0284C7' %}
+      {% set icon_name = 'cloud-rain' %}
+      {% set link_url = url_for('farmer_weather') %}
+    {% elif ntype == 'irrigation' %}
+      {% set card_bg = '#EFF6FF' %}
+      {% set card_border = '#BFDBFE' %}
+      {% set icon_color = '#2563EB' %}
+      {% set icon_name = 'droplet' %}
+      {% set link_url = url_for('farmer_irrigation') %}
+    {% elif ntype == 'price' %}
+      {% set card_bg = '#FFFBEB' %}
+      {% set card_border = '#FDE68A' %}
+      {% set icon_color = '#D97706' %}
+      {% set icon_name = 'trending-up' %}
+      {% set link_url = url_for('farmer_prices') %}
+    {% elif ntype == 'disease' %}
+      {% set card_bg = '#ECFDF5' %}
+      {% set card_border = '#A7F3D0' %}
+      {% set icon_color = '#059669' %}
+      {% set icon_name = 'scan-search' %}
+      {% set link_url = url_for('farmer_disease') %}
+    {% elif ntype == 'marketplace' %}
+      {% set card_bg = '#FFF7ED' %}
+      {% set card_border = '#FED7AA' %}
+      {% set icon_color = '#EA580C' %}
+      {% set icon_name = 'shopping-bag' %}
+      {% set link_url = url_for('farmer_marketplace') %}
+    {% else %}
+      {% set card_bg = '#F9FAFB' %}
+      {% set card_border = '#E5E7EB' %}
+      {% set icon_color = '#4B5563' %}
+      {% set icon_name = 'bell' %}
+      {% set link_url = url_for('farmer_dashboard') %}
+    {% endif %}
+
+    <div style="background:#fff;border-radius:1rem;border:1px solid {{ '#1B5E20' if is_unread else '#E5E7EB' }};padding:1rem;box-shadow:0 1px 3px rgba(0,0,0,0.03);display:flex;align-items:flex-start;gap:1rem;position:relative;transition:all 0.15s;">
+      <!-- Icon Bubble -->
+      <div style="height:2.5rem;width:2.5rem;border-radius:0.75rem;background:{{ card_bg }};border:1px solid {{ card_border }};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i data-lucide="{{ icon_name }}" style="width:1.25rem;height:1.25rem;color:{{ icon_color }};"></i>
+      </div>
+
+      <!-- Text Content -->
+      <div style="flex:1;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;">
+          <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+            <h4 style="font-weight:700;font-size:0.875rem;color:#111827;">{{ n.get('title', 'Notification') }}</h4>
+            {% if is_unread %}
+            <span style="height:0.5rem;width:0.5rem;border-radius:9999px;background:#1B5E20;display:inline-block;"></span>
+            <span style="font-size:0.65rem;font-weight:700;padding:0.1rem 0.375rem;border-radius:0.25rem;background:#DCFCE7;color:#166534;">NEW</span>
+            {% endif %}
+          </div>
+          <span style="font-size:0.7rem;color:#9CA3AF;white-space:nowrap;">{{ n.get('timestamp', 'Recent') }}</span>
+        </div>
+
+        <p style="font-size:0.8125rem;color:#4B5563;margin-top:0.25rem;line-height:1.4;">{{ n.get('message', '') }}</p>
+
+        <!-- Actions -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.75rem;padding-top:0.5rem;border-top:1px solid #F3F4F6;">
+          <a href="{{ link_url }}" style="font-size:0.75rem;font-weight:700;color:#1B5E20;text-decoration:none;display:flex;align-items:center;gap:0.25rem;">
+            <span>View Related Details</span>
+            <i data-lucide="arrow-right" style="width:0.75rem;height:0.75rem;"></i>
+          </a>
+
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            {% if is_unread %}
+            <a href="{{ url_for('api_mark_read', notif_id=n.get('id')) }}" style="font-size:0.7rem;font-weight:600;color:#6B7280;text-decoration:none;padding:0.2rem 0.5rem;border-radius:0.25rem;background:#F3F4F6;">
+              Mark read
+            </a>
+            {% endif %}
+            <a href="{{ url_for('api_delete_notification', notif_id=n.get('id')) }}" style="color:#9CA3AF;padding:0.2rem;" title="Delete notification">
+              <i data-lucide="trash-2" style="width:0.875rem;height:0.875rem;"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+
+    {% if notifications|length == 0 %}
+    <div style="background:#fff;border-radius:1rem;border:2px dashed #E5E7EB;padding:3rem;text-align:center;">
+      <i data-lucide="bell" style="width:2.5rem;height:2.5rem;margin:0 auto 0.75rem auto;color:#9CA3AF;"></i>
+      <h3 style="font-weight:700;font-size:1rem;color:#1F2937;">No Notifications</h3>
+      <p style="font-size:0.75rem;color:#6B7280;margin-top:0.25rem;">You are up to date! Real-time alerts will appear here as they occur.</p>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<script>
+function toggleNotifSettings() {
+  const panel = document.getElementById('notif-settings-panel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,420 @@
+{% extends "layouts/farmer.html" %}
+{% block title %}Farmer Marketplace — KrishiMitra AI{% endblock %}
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div class="flex items-center gap-2">
+      <div style="padding:0.5rem;border-radius:0.5rem;background:#FFEDD5;color:#9A3412;">
+        <i data-lucide="shopping-bag" style="width:1.5rem;height:1.5rem;"></i>
+      </div>
+      <div>
+        <h1 style="font-size:1.5rem;line-height:2rem;font-weight:800;color:#111827;">
+          Farmer Marketplace
+        </h1>
+        <p style="font-size:0.875rem;color:#4B5563;">
+          Connect directly with verified local buyers and fellow farmers. No middleman commission.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs: BUY and SELL -->
+  <div class="space-y-4">
+    <div style="display:grid;grid-template-columns:repeat(2, 1fr);max-width:28rem;width:100%;background:#EFEBE9;border-radius:0.75rem;padding:0.25rem;">
+      <button type="button" id="tab-btn-buy" onclick="switchMarketTab('buy')" style="padding:0.5rem 1rem;font-size:0.875rem;font-weight:700;border-radius:0.5rem;border:none;background:#fff;color:#1B5E20;box-shadow:0 1px 2px rgba(0,0,0,0.05);cursor:pointer;">
+        {{ t.get('buyTab', 'Buy Harvest') }} ({{ listings|length }})
+      </button>
+      <button type="button" id="tab-btn-sell" onclick="switchMarketTab('sell')" style="padding:0.5rem 1rem;font-size:0.875rem;font-weight:700;border-radius:0.5rem;border:none;background:transparent;color:#6B7280;cursor:pointer;">
+        + {{ t.get('sellTab', 'Sell Harvest') }}
+      </button>
+    </div>
+
+    <!-- BUY TAB CONTENT -->
+    <div id="market-buy-tab" class="space-y-4 pt-2">
+      <!-- Search bar -->
+      <div style="background:#fff;padding:0.75rem;border-radius:1rem;border:1px solid #E5E7EB;display:flex;align-items:center;gap:0.75rem;box-shadow:0 1px 2px rgba(0,0,0,0.02);">
+        <i data-lucide="search" style="width:1rem;height:1rem;color:#9CA3AF;"></i>
+        <input
+          type="text"
+          id="market-search"
+          placeholder="Search crop name or location (e.g. Tomato, Onion, Nashik)..."
+          oninput="filterListings()"
+          style="border:none;outline:none;width:100%;font-size:0.875rem;color:#1F2937;"
+        />
+        <button
+          type="button"
+          onclick="clearSearch()"
+          id="clear-btn"
+          style="display:none;font-size:0.75rem;color:#9CA3AF;font-weight:700;padding:0.25rem 0.5rem;background:none;border:none;cursor:pointer;"
+        >
+          Clear
+        </button>
+      </div>
+
+      <!-- Listings Grid -->
+      <div id="listings-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {% for item in listings %}
+        <div class="listing-card" data-crop="{{ item.get('crop', item.get('cropName', ''))|lower }}" data-location="{{ item.get('location', '')|lower }}" style="background:#fff;border-radius:1rem;border:1px solid #E5E7EB;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.05);display:flex;flex-direction:column;justify-content:between;transition:all 0.2s;">
+          <div>
+            <!-- Photo & Badges -->
+            <div style="position:relative;aspect-ratio:16/10;background:#F3F4F6;overflow:hidden;">
+              <img
+                src="{{ item.get('imageUrl', 'https://images.unsplash.com/photo-1592417817098-8f3d69102432?auto=format&fit=crop&w=500&q=80') }}"
+                alt="{{ item.get('crop', item.get('cropName', 'Harvest')) }}"
+                style="width:100%;height:100%;object-fit:cover;transition:transform 0.3s;"
+                onmouseover="this.style.transform='scale(1.05)'"
+                onmouseout="this.style.transform='scale(1)'"
+              />
+              <div style="position:absolute;top:0.625rem;left:0.625rem;display:flex;align-items:center;gap:0.375rem;">
+                <span style="font-size:0.7rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:0.375rem;background:#DCFCE7;color:#166534;border:1px solid #BBF7D0;">
+                  {{ 'FOR SALE' if item.get('type') == 'sell' or not item.get('type') else 'BUYING DEMAND' }}
+                </span>
+                {% if item.get('organicCertified') %}
+                <span style="font-size:0.7rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:0.375rem;background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;">Organic</span>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Body Info -->
+            <div style="padding:1rem;display:flex;flex-direction:column;gap:0.5rem;">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;">
+                <h3 style="font-weight:800;font-size:1.125rem;color:#111827;line-height:1.25;">
+                  {{ item.get('crop', item.get('cropName', 'Produce')) }}
+                </h3>
+              </div>
+
+              <div style="display:flex;align-items:center;gap:0.375rem;font-size:0.75rem;color:#6B7280;">
+                <i data-lucide="map-pin" style="width:0.875rem;height:0.875rem;color:#1B5E20;"></i>
+                <span>{{ item.get('location', '') }}</span>
+              </div>
+
+              <div style="display:flex;align-items:center;justify-content:space-between;padding-top:0.5rem;border-top:1px solid #F3F4F6;">
+                <div>
+                  <span style="font-size:0.75rem;color:#9CA3AF;display:block;font-weight:600;">Quantity</span>
+                  <span style="font-weight:700;font-size:0.875rem;color:#1F2937;">
+                    {{ item.get('quantity', '') }} {{ item.get('unit', '') }}
+                  </span>
+                </div>
+                <div style="text-align:right;">
+                  <span style="font-size:0.75rem;color:#9CA3AF;display:block;font-weight:600;">Price</span>
+                  <span style="font-weight:900;font-size:1.125rem;color:#1B5E20;">
+                    ₹{{ item.get('pricePerUnit', '') }} <span style="font-size:0.75rem;color:#6B7280;font-weight:400;">/{{ item.get('unit', 'unit') }}</span>
+                  </span>
+                </div>
+              </div>
+
+              <div style="padding-top:0.25rem;display:flex;align-items:center;gap:0.5rem;font-size:0.75rem;color:#4B5563;background:#F8F9F5;padding:0.5rem;border-radius:0.5rem;">
+                <i data-lucide="user" style="width:0.875rem;height:0.875rem;color:#9CA3AF;"></i>
+                <span style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ item.get('sellerName', 'Verified Seller') }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions: View & Contact -->
+          <div style="padding:1rem;padding-top:0;display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+            <button
+              type="button"
+              onclick="openViewModal('{{ item.get('crop', item.get('cropName', ''))|escape }}', '{{ item.get('sellerName', '')|escape }}', '{{ item.get('location', '')|escape }}', '{{ item.get('quantity', '') }}', '{{ item.get('unit', '') }}', '{{ item.get('pricePerUnit', '') }}', '{{ item.get('description', '')|escape }}', '{{ item.get('imageUrl', 'https://images.unsplash.com/photo-1592417817098-8f3d69102432?auto=format&fit=crop&w=500&q=80') }}', '{{ item.get('sellerPhone', '+91 98220 12345') }}')"
+              style="padding:0.5rem;border-radius:0.5rem;border:1px solid #D1D5DB;background:#fff;font-size:0.75rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:0.25rem;cursor:pointer;color:#374151;"
+            >
+              <i data-lucide="eye" style="width:0.875rem;height:0.875rem;"></i>
+              <span>View</span>
+            </button>
+
+            <button
+              type="button"
+              onclick="openContactModal('{{ item.get('sellerName', '')|escape }}', '{{ item.get('location', '')|escape }}', '{{ item.get('sellerPhone', '+91 98220 12345') }}')"
+              style="padding:0.5rem;border-radius:0.5rem;border:none;background:#1B5E20;color:#fff;font-size:0.75rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:0.25rem;cursor:pointer;"
+            >
+              <i data-lucide="phone" style="width:0.875rem;height:0.875rem;"></i>
+              <span>Contact</span>
+            </button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div id="no-listings-msg" style="display:none;background:#fff;border-radius:1rem;border:2px dashed #D1D5DB;padding:3rem;text-align:center;">
+        <i data-lucide="shopping-bag" style="width:2.5rem;height:2.5rem;margin:0 auto 0.75rem auto;color:#9CA3AF;"></i>
+        <h3 style="font-weight:700;font-size:1rem;color:#1F2937;">No Listings Found</h3>
+        <p style="font-size:0.75rem;color:#6B7280;margin-top:0.25rem;">
+          Try searching for another crop name or list your harvest to sell.
+        </p>
+      </div>
+    </div>
+
+    <!-- SELL TAB CONTENT -->
+    <div id="market-sell-tab" style="display:none;max-width:36rem;margin:0 auto;padding-top:0.5rem;">
+      <div style="background:#fff;border-radius:1rem;border:1px solid #E5E7EB;box-shadow:0 1px 3px rgba(0,0,0,0.05);overflow:hidden;">
+        <div style="padding:1.5rem;border-bottom:1px solid #F3F4F6;">
+          <h3 style="font-size:1.25rem;font-weight:700;color:#111827;">List Harvest for Sale</h3>
+          <p style="font-size:0.75rem;color:#6B7280;margin-top:0.25rem;">
+            Post your produce so bulk buyers and wholesalers can reach you directly.
+          </p>
+        </div>
+
+        <div style="padding:1.5rem;">
+          <form action="{{ url_for('api_add_listing') }}" method="POST" style="display:flex;flex-direction:column;gap:1rem;">
+            <div>
+              <label style="display:block;font-size:0.75rem;font-weight:700;color:#374151;text-transform:uppercase;margin-bottom:0.25rem;">
+                Crop Name / पिकाचे नाव
+              </label>
+              <input
+                type="text"
+                name="cropName"
+                value="Fresh Farm Tomatoes"
+                required
+                style="width:100%;height:3rem;border-radius:0.5rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;"
+              />
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+              <div>
+                <label style="display:block;font-size:0.75rem;font-weight:700;color:#374151;text-transform:uppercase;margin-bottom:0.25rem;">
+                  Quantity Available
+                </label>
+                <input
+                  type="number"
+                  name="quantity"
+                  value="50"
+                  required
+                  style="width:100%;height:3rem;border-radius:0.5rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;"
+                />
+              </div>
+              <div>
+                <label style="display:block;font-size:0.75rem;font-weight:700;color:#374151;text-transform:uppercase;margin-bottom:0.25rem;">
+                  Unit
+                </label>
+                <select
+                  name="unit"
+                  style="width:100%;height:3rem;border-radius:0.5rem;border:1px solid #D1D5DB;padding:0 0.75rem;background:#fff;font-size:0.875rem;"
+                >
+                  <option value="Crates">Crates (20kg crate)</option>
+                  <option value="Quintals">Quintals (100kg bag)</option>
+                  <option value="Tons">Tons</option>
+                  <option value="Kg">Kg</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+              <div>
+                <label style="display:block;font-size:0.75rem;font-weight:700;color:#374151;text-transform:uppercase;margin-bottom:0.25rem;">
+                  Expected Price (₹ / Unit)
+                </label>
+                <input
+                  type="number"
+                  name="pricePerUnit"
+                  value="480"
+                  required
+                  style="width:100%;height:3rem;border-radius:0.5rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;"
+                />
+              </div>
+              <div>
+                <label style="display:block;font-size:0.75rem;font-weight:700;color:#374151;text-transform:uppercase;margin-bottom:0.25rem;">
+                  Location / Farm Gate
+                </label>
+                <input
+                  type="text"
+                  name="location"
+                  value="{{ farmer.get('village', 'Pimpalgaon') }}, {{ farmer.get('district', 'Nashik') }}"
+                  required
+                  style="width:100%;height:3rem;border-radius:0.5rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label style="display:block;font-size:0.75rem;font-weight:700;color:#374151;text-transform:uppercase;margin-bottom:0.25rem;">
+                Description / Extra Notes
+              </label>
+              <textarea
+                name="description"
+                rows="3"
+                style="width:100%;border-radius:0.5rem;border:1px solid #D1D5DB;padding:0.75rem;font-size:0.875rem;"
+              >Freshly harvested ripe produce, graded and packed.</textarea>
+            </div>
+
+            <button
+              type="submit"
+              style="width:100%;background:#1B5E20;color:#fff;font-weight:700;height:3rem;font-size:1rem;border-radius:0.5rem;border:none;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,0.05);margin-top:0.5rem;"
+            >
+              Publish Listing to Marketplace
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW MODAL -->
+  <div id="viewModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:50;align-items:center;justify-content:center;padding:1rem;">
+    <div style="background:#fff;border-radius:1rem;max-width:32rem;width:100%;overflow:hidden;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1);">
+      <div style="padding:1.25rem;border-bottom:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <h3 id="modalCrop" style="font-size:1.125rem;font-weight:800;color:#111827;">Crop</h3>
+          <p id="modalSellerLoc" style="font-size:0.75rem;color:#6B7280;">Seller info</p>
+        </div>
+        <button onclick="closeViewModal()" style="background:none;border:none;font-size:1.25rem;color:#9CA3AF;cursor:pointer;">&times;</button>
+      </div>
+      <div style="padding:1.25rem;display:flex;flex-direction:column;gap:1rem;">
+        <img id="modalImg" src="" alt="produce" style="width:100%;height:12rem;object-fit:cover;border-radius:0.75rem;border:1px solid #E5E7EB;" />
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+          <div style="padding:0.75rem;border-radius:0.5rem;background:#F9FAFB;">
+            <span style="font-size:0.75rem;color:#9CA3AF;display:block;font-weight:600;">Available Quantity</span>
+            <span id="modalQty" style="font-weight:700;color:#111827;">-</span>
+          </div>
+          <div style="padding:0.75rem;border-radius:0.5rem;background:#F9FAFB;">
+            <span style="font-size:0.75rem;color:#9CA3AF;display:block;font-weight:600;">Price</span>
+            <span id="modalPrice" style="font-weight:800;color:#1B5E20;font-size:1rem;">-</span>
+          </div>
+        </div>
+        <div>
+          <span style="font-size:0.75rem;font-weight:700;color:#6B7280;text-transform:uppercase;display:block;margin-bottom:0.25rem;">Description</span>
+          <p id="modalDesc" style="font-size:0.875rem;color:#374151;background:#F8F9F5;padding:0.75rem;border-radius:0.75rem;border:1px solid #E5E7EB;">-</p>
+        </div>
+      </div>
+      <div style="padding:1rem;border-top:1px solid #E5E7EB;display:flex;justify-content:flex-end;gap:0.5rem;">
+        <button onclick="closeViewModal()" style="padding:0.5rem 1rem;border-radius:0.5rem;border:1px solid #D1D5DB;background:#fff;font-size:0.75rem;font-weight:700;cursor:pointer;">Close</button>
+        <button id="modalContactBtn" style="padding:0.5rem 1rem;border-radius:0.5rem;border:none;background:#1B5E20;color:#fff;font-size:0.75rem;font-weight:700;cursor:pointer;">Contact Seller</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTACT MODAL -->
+  <div id="contactModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:50;align-items:center;justify-content:center;padding:1rem;">
+    <div style="background:#fff;border-radius:1rem;max-width:26rem;width:100%;overflow:hidden;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1);padding:1.5rem;text-align:center;">
+      <div id="contactInit" style="margin:0 auto 1rem auto;height:4rem;width:4rem;border-radius:9999px;background:#E8F5E9;color:#1B5E20;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.5rem;">
+        F
+      </div>
+      <h4 id="contactName" style="font-weight:700;font-size:1.125rem;color:#111827;">Seller</h4>
+      <p id="contactLoc" style="font-size:0.75rem;color:#6B7280;margin-bottom:1rem;">Location</p>
+
+      <div style="padding:1rem;border-radius:0.75rem;background:#F9FAFB;border:1px solid #E5E7EB;margin-bottom:1rem;">
+        <span style="font-size:0.75rem;color:#9CA3AF;font-weight:700;text-transform:uppercase;display:block;">Mobile Number</span>
+        <a id="contactPhoneLink" href="#" style="font-size:1.25rem;font-weight:800;color:#1B5E20;text-decoration:none;display:block;margin-top:0.25rem;">+91 98220 12345</a>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem;">
+        <a id="callAction" href="#" style="display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.75rem;border-radius:0.75rem;background:#1B5E20;color:#fff;font-weight:700;font-size:0.875rem;text-decoration:none;">
+          <i data-lucide="phone" style="width:1rem;height:1rem;"></i>
+          <span>Call Farmer</span>
+        </a>
+        <button type="button" onclick="alert('WhatsApp chat initiated with seller')" style="display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.75rem;border-radius:0.75rem;background:#25D366;color:#fff;font-weight:700;font-size:0.875rem;border:none;cursor:pointer;">
+          <i data-lucide="message-circle" style="width:1rem;height:1rem;"></i>
+          <span>WhatsApp</span>
+        </button>
+      </div>
+
+      <button onclick="closeContactModal()" style="width:100%;padding:0.5rem;border-radius:0.5rem;border:1px solid #D1D5DB;background:#fff;font-size:0.75rem;font-weight:700;cursor:pointer;">
+        Done
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function switchMarketTab(t) {
+  const buyBtn = document.getElementById('tab-btn-buy');
+  const sellBtn = document.getElementById('tab-btn-sell');
+  const buyContent = document.getElementById('market-buy-tab');
+  const sellContent = document.getElementById('market-sell-tab');
+
+  if (t === 'buy') {
+    buyBtn.style.background = '#fff';
+    buyBtn.style.color = '#1B5E20';
+    buyBtn.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
+    sellBtn.style.background = 'transparent';
+    sellBtn.style.color = '#6B7280';
+    sellBtn.style.boxShadow = 'none';
+    buyContent.style.display = 'block';
+    sellContent.style.display = 'none';
+  } else {
+    sellBtn.style.background = '#fff';
+    sellBtn.style.color = '#1B5E20';
+    sellBtn.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
+    buyBtn.style.background = 'transparent';
+    buyBtn.style.color = '#6B7280';
+    buyBtn.style.boxShadow = 'none';
+    sellContent.style.display = 'block';
+    buyContent.style.display = 'none';
+  }
+}
+
+function filterListings() {
+  const q = document.getElementById('market-search').value.toLowerCase().trim();
+  const clearBtn = document.getElementById('clear-btn');
+  clearBtn.style.display = q ? 'block' : 'none';
+
+  const cards = document.querySelectorAll('.listing-card');
+  let visibleCount = 0;
+  cards.forEach(card => {
+    const crop = card.dataset.crop || '';
+    const loc = card.dataset.location || '';
+    if (!q || crop.includes(q) || loc.includes(q)) {
+      card.style.display = 'flex';
+      visibleCount++;
+    } else {
+      card.style.display = 'none';
+    }
+  });
+
+  const noMsg = document.getElementById('no-listings-msg');
+  if (visibleCount === 0) {
+    noMsg.style.display = 'block';
+  } else {
+    noMsg.style.display = 'none';
+  }
+}
+
+function clearSearch() {
+  document.getElementById('market-search').value = '';
+  filterListings();
+}
+
+let activeSellerInfo = {};
+
+function openViewModal(crop, sellerName, loc, qty, unit, price, desc, img, phone) {
+  document.getElementById('modalCrop').innerText = crop;
+  document.getElementById('modalSellerLoc').innerText = `Posted by ${sellerName} from ${loc}`;
+  document.getElementById('modalQty').innerText = `${qty} ${unit}`;
+  document.getElementById('modalPrice').innerText = `₹${price} / ${unit}`;
+  document.getElementById('modalDesc').innerText = desc || 'Freshly harvested farm produce.';
+  document.getElementById('modalImg').src = img;
+  
+  activeSellerInfo = { name: sellerName, loc: loc, phone: phone };
+
+  const contactBtn = document.getElementById('modalContactBtn');
+  contactBtn.onclick = function() {
+    closeViewModal();
+    openContactModal(sellerName, loc, phone);
+  };
+
+  const modal = document.getElementById('viewModal');
+  modal.style.display = 'flex';
+}
+
+function closeViewModal() {
+  document.getElementById('viewModal').style.display = 'none';
+}
+
+function openContactModal(name, loc, phone) {
+  document.getElementById('contactInit').innerText = (name || 'F').charAt(0).toUpperCase();
+  document.getElementById('contactName').innerText = name || 'Farmer';
+  document.getElementById('contactLoc').innerText = loc || 'Nashik';
+  document.getElementById('contactPhoneLink').innerText = phone || '+91 98220 12345';
+  document.getElementById('contactPhoneLink').href = `tel:${phone || '+91 98220 12345'}`;
+  document.getElementById('callAction').href = `tel:${phone || '+91 98220 12345'}`;
+
+  const modal = document.getElementById('contactModal');
+  modal.style.display = 'flex';
+}
+
+function closeContactModal() {
+  document.getElementById('contactModal').style.display = 'none';
+}
+</script>
+{% endblock %}

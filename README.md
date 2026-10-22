@@ -47,15 +47,28 @@ KrishiMitra supports 8 Indian languages with seamless instant switching across a
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Getting Started (Python + Flask)
 
 ### Prerequisites
-- Node.js (v18+ recommended)
-- npm or yarn
+- Python 3.9+
+- pip
 
-### Installation
+### Installation & Running Locally
+```bash
+# 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Run Flask application
+python app.py
+```
+Open [http://localhost:5000](http://localhost:5000) in your browser.
+
+---
+
+### Previous Node/Vite (Reference)
 ```bash
 npm install
+npm run dev
 ```
 
 ### Run Development Server

@@ -1,0 +1,158 @@
+{% extends "layouts/public.html" %}
+{% block title %}Sign In — KrishiMitra AI{% endblock %}
+{% block content %}
+<div style="min-height:80vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;">
+  <div style="width:100%;max-width:26rem;">
+
+    <!-- Back + Language -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding:0 0.25rem;">
+      <a href="{{ url_for('landing') }}" style="font-size:0.75rem;font-weight:600;color:#6B7280;display:flex;align-items:center;gap:0.25rem;transition:color 150ms;" onmouseover="this.style.color='#1B5E20'" onmouseout="this.style.color='#6B7280'">
+        ← {{ t.get('backToHome','Back to Home') }}
+      </a>
+      {% include "components/language_selector.html" %}
+    </div>
+
+    <!-- Card -->
+    <div style="background:#fff;border:1px solid #D1D5DB;border-radius:1rem;box-shadow:0 4px 24px rgba(0,0,0,0.08);overflow:hidden;">
+      <div id="loginCard" style="padding:1.5rem 1.5rem 1rem;">
+        <!-- Icon -->
+        <div id="roleIcon" style="width:3rem;height:3rem;border-radius:0.875rem;display:flex;align-items:center;justify-content:center;color:#fff;margin:0 auto 0.75rem;background:#1B5E20;box-shadow:0 2px 6px rgba(0,0,0,0.12);">
+          <i id="roleIconSvg" data-lucide="sprout" style="width:1.5rem;height:1.5rem;"></i>
+        </div>
+        <h1 style="font-size:1.5rem;font-weight:900;color:#111827;text-align:center;margin-bottom:0.25rem;">{{ t.get('login','Login') }}</h1>
+        <p style="font-size:0.75rem;color:#6B7280;text-align:center;margin-bottom:1rem;">Select your role and sign in to open your dedicated portal</p>
+
+        <!-- Role Selector -->
+        <div style="margin-bottom:0.75rem;">
+          <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#9CA3AF;margin-bottom:0.5rem;">
+            Select Your Position / भूमिका निवडा:
+          </label>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.375rem;padding:0.25rem;background:#F3F4F6;border-radius:0.75rem;">
+            <button type="button" id="roleFarmer" onclick="selectRole('farmer')"
+              class="role-btn active-role-farmer"
+              style="display:flex;flex-direction:column;align-items:center;padding:0.5rem 0.25rem;border-radius:0.5rem;font-size:0.7rem;font-weight:700;cursor:pointer;border:none;transition:all 150ms;">
+              <i data-lucide="sprout" style="width:1rem;height:1rem;margin-bottom:0.25rem;"></i>
+              <span>Farmer</span>
+              <span style="font-size:0.625rem;font-weight:400;color:#9CA3AF;">शेतकरी</span>
+            </button>
+            <button type="button" id="roleStudent" onclick="selectRole('student')"
+              class="role-btn"
+              style="display:flex;flex-direction:column;align-items:center;padding:0.5rem 0.25rem;border-radius:0.5rem;font-size:0.7rem;font-weight:700;cursor:pointer;border:none;color:#6B7280;background:transparent;transition:all 150ms;">
+              <i data-lucide="graduation-cap" style="width:1rem;height:1rem;margin-bottom:0.25rem;"></i>
+              <span>Student</span>
+              <span style="font-size:0.625rem;font-weight:400;color:#9CA3AF;">विद्यार्थी</span>
+            </button>
+            <button type="button" id="roleAdmin" onclick="selectRole('admin')"
+              class="role-btn"
+              style="display:flex;flex-direction:column;align-items:center;padding:0.5rem 0.25rem;border-radius:0.5rem;font-size:0.7rem;font-weight:700;cursor:pointer;border:none;color:#6B7280;background:transparent;transition:all 150ms;">
+              <i data-lucide="shield-check" style="width:1rem;height:1rem;margin-bottom:0.25rem;"></i>
+              <span>Admin</span>
+              <span style="font-size:0.625rem;font-weight:400;color:#9CA3AF;">प्रशासक</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <div style="padding:0 1.5rem 1rem;">
+        <form method="POST" action="{{ url_for('api_login') }}" class="space-y-4" id="loginForm">
+          <input type="hidden" name="role" id="selectedRole" value="{{ initial_role or 'farmer' }}" />
+
+          <div>
+            <label id="identifierLabel" style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.25rem;">Mobile Number or Email</label>
+            <div style="position:relative;">
+              <span id="identifierIcon" style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:#9CA3AF;">
+                <i data-lucide="phone" style="width:1rem;height:1rem;"></i>
+              </span>
+              <input type="text" name="identifier" id="identifierInput" placeholder="e.g. 9822045678 or farmer@example.com" value="9822045678"
+                style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem 0 2.5rem;font-size:0.875rem;box-sizing:border-box;outline:none;" required />
+            </div>
+          </div>
+
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;">
+              <label style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;">Password</label>
+              <button type="button" style="font-size:0.75rem;font-weight:600;color:#1B5E20;cursor:pointer;border:none;background:none;">Reset?</button>
+            </div>
+            <div style="position:relative;">
+              <span style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:#9CA3AF;">
+                <i data-lucide="lock" style="width:1rem;height:1rem;"></i>
+              </span>
+              <input type="password" name="password" id="passwordInput" placeholder="Enter minimum 6 characters" value="kisan1234"
+                style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem 0 2.5rem;font-size:0.875rem;box-sizing:border-box;outline:none;" required />
+            </div>
+          </div>
+
+          <button type="submit" id="submitBtn"
+            style="width:100%;height:2.75rem;border-radius:0.75rem;border:none;background:#1B5E20;color:#fff;font-size:0.875rem;font-weight:700;cursor:pointer;transition:background 150ms;">
+            Sign In as FARMER
+          </button>
+        </form>
+      </div>
+
+      <!-- Quick Demo Section -->
+      <div style="background:#F8F9F5;border-top:1px solid #F3F4F6;padding:0.875rem 1.5rem;border-radius:0 0 1rem 1rem;">
+        <p style="font-size:0.675rem;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.05em;text-align:center;margin-bottom:0.625rem;">Instant 1-Click Demo Login</p>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.375rem;">
+          <a href="{{ url_for('api_demo_login', role='farmer') }}" style="display:flex;flex-direction:column;align-items:center;gap:0.25rem;padding:0.5rem 0.25rem;border-radius:0.5rem;border:1px solid #E5E7EB;background:#fff;font-size:0.675rem;font-weight:700;color:#374151;text-decoration:none;transition:all 150ms;" onmouseover="this.style.background='#F0FDF4';this.style.color='#166534';this.style.borderColor='#86EFAC'" onmouseout="this.style.background='#fff';this.style.color='#374151';this.style.borderColor='#E5E7EB'">
+            <i data-lucide="user-check" style="width:0.875rem;height:0.875rem;color:#15803D;"></i>
+            <span>Farmer</span>
+          </a>
+          <a href="{{ url_for('api_demo_login', role='student') }}" style="display:flex;flex-direction:column;align-items:center;gap:0.25rem;padding:0.5rem 0.25rem;border-radius:0.5rem;border:1px solid #E5E7EB;background:#fff;font-size:0.675rem;font-weight:700;color:#374151;text-decoration:none;transition:all 150ms;" onmouseover="this.style.background='#EEF2FF';this.style.color='#4338CA';this.style.borderColor='#A5B4FC'" onmouseout="this.style.background='#fff';this.style.color='#374151';this.style.borderColor='#E5E7EB'">
+            <i data-lucide="graduation-cap" style="width:0.875rem;height:0.875rem;color:#4F46E5;"></i>
+            <span>Student</span>
+          </a>
+          <a href="{{ url_for('api_demo_login', role='admin') }}" style="display:flex;flex-direction:column;align-items:center;gap:0.25rem;padding:0.5rem 0.25rem;border-radius:0.5rem;border:1px solid #E5E7EB;background:#fff;font-size:0.675rem;font-weight:700;color:#374151;text-decoration:none;transition:all 150ms;" onmouseover="this.style.background='#F0FDF4';this.style.color='#14532D';this.style.borderColor='#4ADE80'" onmouseout="this.style.background='#fff';this.style.color='#374151';this.style.borderColor='#E5E7EB'">
+            <i data-lucide="shield-check" style="width:0.875rem;height:0.875rem;color:#166534;"></i>
+            <span>Admin</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <p style="text-align:center;font-size:0.75rem;color:#9CA3AF;margin-top:1rem;">
+      New to KrishiMitra?
+      <a href="{{ url_for('register') }}" style="font-weight:700;color:#1B5E20;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Register your Farm or Student Account</a>
+    </p>
+  </div>
+</div>
+
+<script>
+const roleColors = {
+  farmer: { bg: '#1B5E20', icon: 'sprout', label: 'Mobile Number or Email', placeholder: 'e.g. 9822045678 or farmer@example.com', idVal: '9822045678', passVal: 'kisan1234', iconName: 'phone' },
+  student: { bg: '#4F46E5', icon: 'graduation-cap', label: 'Student Mobile or Email', placeholder: 'student@krishimitra.edu or mobile', idVal: '9765432100', passVal: 'student123', iconName: 'phone' },
+  admin: { bg: '#14532D', icon: 'shield-check', label: 'Official Email / Officer ID', placeholder: 'admin@krishimitra.gov.in', idVal: 'ramesh.admin@krishimitra.gov.in', passVal: 'admin1234', iconName: 'mail' }
+};
+
+function selectRole(role) {
+  const cfg = roleColors[role];
+  document.getElementById('selectedRole').value = role;
+  document.getElementById('roleIcon').style.background = cfg.bg;
+  document.getElementById('roleIconSvg').setAttribute('data-lucide', cfg.icon);
+  document.getElementById('identifierLabel').textContent = cfg.label;
+  document.getElementById('identifierInput').placeholder = cfg.placeholder;
+  document.getElementById('identifierInput').value = cfg.idVal;
+  document.getElementById('passwordInput').value = cfg.passVal;
+  document.getElementById('submitBtn').style.background = cfg.bg;
+  document.getElementById('submitBtn').textContent = 'Sign In as ' + role.toUpperCase();
+  // Update icon
+  document.getElementById('identifierIcon').innerHTML = '<i data-lucide="' + cfg.iconName + '" style="width:1rem;height:1rem;"></i>';
+
+  // Reset all buttons
+  document.querySelectorAll('.role-btn').forEach(b => {
+    b.style.background = 'transparent';
+    b.style.color = '#6B7280';
+    b.style.boxShadow = 'none';
+  });
+  const btn = document.getElementById('role' + role.charAt(0).toUpperCase() + role.slice(1));
+  btn.style.background = '#fff';
+  btn.style.color = cfg.bg;
+  btn.style.boxShadow = '0 1px 2px rgba(0,0,0,0.08)';
+
+  if (window.lucide) lucide.createIcons();
+}
+
+// Set initial role
+selectRole('{{ initial_role or "farmer" }}');
+</script>
+{% endblock %}

@@ -1,0 +1,295 @@
+{% extends "layouts/farmer.html" %}
+{% block title %}My Farmer Profile — KrishiMitra AI{% endblock %}
+{% block content %}
+<div class="space-y-6 max-w-3xl mx-auto">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between border-b border-gray-200 pb-4">
+    <div>
+      <h1 style="font-size:1.5rem;line-height:2rem;font-weight:800;color:#111827;">
+        My Farmer Profile
+      </h1>
+      <p style="font-size:0.875rem;color:#4B5563;">
+        Manage your personal farm identity and regional preferences.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      id="profile-edit-toggle-btn"
+      onclick="toggleProfileEdit()"
+      style="padding:0.5rem 1rem;border-radius:0.5rem;font-size:0.875rem;font-weight:700;display:flex;align-items:center;gap:0.375rem;cursor:pointer;background:#1B5E20;color:#fff;border:none;"
+    >
+      <i data-lucide="edit-3" style="width:1rem;height:1rem;"></i>
+      <span id="profile-edit-btn-text">Edit Profile</span>
+    </button>
+  </div>
+
+  <div style="background:#fff;border-radius:1.5rem;border:1px solid #E5E7EB;box-shadow:0 1px 3px rgba(0,0,0,0.05);overflow:hidden;">
+    <!-- Profile Card Header Banner -->
+    <div style="background:linear-gradient(to right, #1B5E20, #2E7D32);padding:1.5rem;color:#fff;display:flex;flex-direction:row;align-items:center;gap:1rem;flex-wrap:wrap;">
+      <img
+        src="{{ farmer.get('avatar', 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=250&q=80') }}"
+        alt="{{ farmer.get('name', 'Farmer') }}"
+        style="height:5rem;width:5rem;border-radius:9999px;object-fit:cover;border:4px solid #fff;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);flex-shrink:0;"
+      />
+      <div style="display:flex;flex-direction:column;gap:0.25rem;">
+        <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+          <h2 style="font-size:1.5rem;font-weight:900;">{{ farmer.get('name', 'Farmer') }}</h2>
+          <span style="font-size:0.75rem;font-weight:700;padding:0.125rem 0.5rem;border-radius:9999px;background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.3);">
+            Verified Farmer
+          </span>
+        </div>
+        <p style="font-size:0.75rem;color:#D1FAE5;display:flex;align-items:center;gap:0.25rem;">
+          <i data-lucide="map-pin" style="width:0.875rem;height:0.875rem;"></i>
+          <span>{{ farmer.get('village', 'Pimpalgaon') }}, {{ farmer.get('district', 'Nashik') }}, {{ farmer.get('state', 'Maharashtra') }}</span>
+        </p>
+        <p style="font-size:0.7rem;color:#A7F3D0;display:flex;align-items:center;gap:0.25rem;">
+          <i data-lucide="calendar" style="width:0.875rem;height:0.875rem;"></i>
+          <span>Member since June 2025</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- View Mode Details -->
+    <div id="profile-view-mode" style="padding:1.5rem;display:flex;flex-direction:column;gap:1.5rem;">
+      <!-- Section 1: Personal & Contact -->
+      <div>
+        <h3 style="font-size:0.875rem;font-weight:700;color:#6B7280;text-transform:uppercase;margin-bottom:0.75rem;display:flex;align-items:center;gap:0.5rem;">
+          <i data-lucide="user" style="width:1rem;height:1rem;color:#1B5E20;"></i>
+          <span>Personal Information</span>
+        </h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:1rem;">
+          <div style="background:#F8F9F5;padding:0.75rem 1rem;border-radius:0.75rem;border:1px solid #E5E7EB;">
+            <span style="font-size:0.75rem;color:#9CA3AF;display:block;">Full Name</span>
+            <span style="font-weight:700;color:#111827;font-size:0.875rem;">{{ farmer.get('name', 'Farmer') }}</span>
+          </div>
+          <div style="background:#F8F9F5;padding:0.75rem 1rem;border-radius:0.75rem;border:1px solid #E5E7EB;">
+            <span style="font-size:0.75rem;color:#9CA3AF;display:block;">Mobile Phone</span>
+            <span style="font-weight:700;color:#111827;font-size:0.875rem;">{{ farmer.get('phone', '+91 98220 12345') }}</span>
+          </div>
+          <div style="background:#F8F9F5;padding:0.75rem 1rem;border-radius:0.75rem;border:1px solid #E5E7EB;">
+            <span style="font-size:0.75rem;color:#9CA3AF;display:block;">Village</span>
+            <span style="font-weight:700;color:#111827;font-size:0.875rem;">{{ farmer.get('village', 'Pimpalgaon') }}</span>
+          </div>
+          <div style="background:#F8F9F5;padding:0.75rem 1rem;border-radius:0.75rem;border:1px solid #E5E7EB;">
+            <span style="font-size:0.75rem;color:#9CA3AF;display:block;">District & State</span>
+            <span style="font-weight:700;color:#111827;font-size:0.875rem;">{{ farmer.get('district', 'Nashik') }}, {{ farmer.get('state', 'Maharashtra') }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Farm Details -->
+      <div>
+        <h3 style="font-size:0.875rem;font-weight:700;color:#6B7280;text-transform:uppercase;margin-bottom:0.75rem;display:flex;align-items:center;gap:0.5rem;">
+          <i data-lucide="sprout" style="width:1rem;height:1rem;color:#1B5E20;"></i>
+          <span>Farm & Soil Specification</span>
+        </h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:1rem;">
+          <div style="background:#F8F9F5;padding:0.75rem 1rem;border-radius:0.75rem;border:1px solid #E5E7EB;">
+            <span style="font-size:0.75rem;color:#9CA3AF;display:block;">Total Land Holding</span>
+            <span style="font-weight:700;color:#111827;font-size:0.875rem;">{{ farmer.get('landSize', 3.5) }} Acres</span>
+          </div>
+          <div style="background:#F8F9F5;padding:0.75rem 1rem;border-radius:0.75rem;border:1px solid #E5E7EB;">
+            <span style="font-size:0.75rem;color:#9CA3AF;display:block;">Soil Classification</span>
+            <span style="font-weight:700;color:#111827;font-size:0.875rem;">{{ farmer.get('soilType', 'Medium Black Clayey Loam') }}</span>
+          </div>
+          <div style="background:#F8F9F5;padding:0.75rem 1rem;border-radius:0.75rem;border:1px solid #E5E7EB;">
+            <span style="font-size:0.75rem;color:#9CA3AF;display:block;">Crops in Season</span>
+            <span style="font-weight:700;color:#111827;font-size:0.875rem;">{{ farmer.get('mainCrops', ['Tomato', 'Onion'])|join(', ') }}</span>
+          </div>
+          <div style="background:#F8F9F5;padding:0.75rem 1rem;border-radius:0.75rem;border:1px solid #E5E7EB;">
+            <span style="font-size:0.75rem;color:#9CA3AF;display:block;">Primary Language</span>
+            <span style="font-weight:700;color:#111827;font-size:0.875rem;">{{ farmer.get('preferredLanguage', 'en')|upper }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Mode Form -->
+    <div id="profile-edit-mode" style="display:none;padding:1.5rem;">
+      <form action="{{ url_for('api_update_profile') }}" method="POST" style="display:flex;flex-direction:column;gap:1rem;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:1rem;">
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:700;color:#374151;text-transform:uppercase;margin-bottom:0.25rem;">
+              Full Name / नाव
+            </label>
+            <input
+              type="text"
+              name="name"
+              value="{{ farmer.get('name', '') }}"
+              required
+              style="width:100%;height:2.75rem;border-radius:0.5rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;"
+            />
+          </div>
+
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:700;color:#374151;text-transform:uppercase;margin-bottom:0.25rem;">
+              Phone Number / मोबाईल
+            </label>
+            <input
+              type="text"
+              name="phone"
+              value="{{ farmer.get('phone', '') }}"
+              required
+              style="width:100%;height:2.75rem;border-radius:0.5rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;"
+            />
+          </div>
+
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:700;color:#374151;text-transform:uppercase;margin-bottom:0.25rem;">
+              Village / गाव
+            </label>
+            <input
+              type="text"
+              name="village"
+              value="{{ farmer.get('village', '') }}"
+              required
+              style="width:100%;height:2.75rem;border-radius:0.5rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;"
+            />
+          </div>
+
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:700;color:#374151;text-transform:uppercase;margin-bottom:0.25rem;">
+              State / राज्य
+            </label>
+            <select
+              id="state-select"
+              name="state"
+              onchange="onProfileStateChange(this.value)"
+              style="width:100%;height:2.75rem;border-radius:0.5rem;border:1px solid #D1D5DB;padding:0 0.75rem;background:#fff;font-size:0.875rem;"
+            >
+              {% for st in all_india_states %}
+              <option value="{{ st.name }}" {% if st.name == farmer.get('state') %}selected{% endif %}>{{ st.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:700;color:#374151;text-transform:uppercase;margin-bottom:0.25rem;">
+              District / जिल्हा
+            </label>
+            <select
+              id="district-select"
+              name="district"
+              style="width:100%;height:2.75rem;border-radius:0.5rem;border:1px solid #D1D5DB;padding:0 0.75rem;background:#fff;font-size:0.875rem;"
+            >
+              <option value="{{ farmer.get('district', 'Nashik') }}">{{ farmer.get('district', 'Nashik') }}</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:700;color:#374151;text-transform:uppercase;margin-bottom:0.25rem;">
+              Land Size (Acres)
+            </label>
+            <input
+              type="number"
+              step="0.5"
+              name="landSize"
+              value="{{ farmer.get('landSize', '3.5') }}"
+              required
+              style="width:100%;height:2.75rem;border-radius:0.5rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;"
+            />
+          </div>
+
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:700;color:#374151;text-transform:uppercase;margin-bottom:0.25rem;">
+              Main Crop Grown
+            </label>
+            <select
+              name="mainCrop"
+              style="width:100%;height:2.75rem;border-radius:0.5rem;border:1px solid #D1D5DB;padding:0 0.75rem;background:#fff;font-size:0.875rem;"
+            >
+              {% set main_crop = farmer.get('mainCrops', ['Tomato'])[0] %}
+              <option value="Tomato" {% if main_crop == 'Tomato' %}selected{% endif %}>Tomato</option>
+              <option value="Onion" {% if main_crop == 'Onion' %}selected{% endif %}>Onion</option>
+              <option value="Soybean" {% if main_crop == 'Soybean' %}selected{% endif %}>Soybean</option>
+              <option value="Cotton" {% if main_crop == 'Cotton' %}selected{% endif %}>Cotton</option>
+              <option value="Wheat" {% if main_crop == 'Wheat' %}selected{% endif %}>Wheat</option>
+              <option value="Rice" {% if main_crop == 'Rice' %}selected{% endif %}>Rice</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:700;color:#374151;text-transform:uppercase;margin-bottom:0.25rem;">
+              Soil Type
+            </label>
+            <select
+              name="soilType"
+              style="width:100%;height:2.75rem;border-radius:0.5rem;border:1px solid #D1D5DB;padding:0 0.75rem;background:#fff;font-size:0.875rem;"
+            >
+              <option value="Medium Black Clayey Loam" selected>Black Clayey Loam</option>
+              <option value="Red Sandy Loam">Red Sandy Loam</option>
+              <option value="Alluvial River Loam">Alluvial River Loam</option>
+              <option value="Laterite / Murrum Soil">Laterite Soil</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;gap:0.75rem;padding-top:1rem;border-top:1px solid #E5E7EB;margin-top:0.5rem;">
+          <button
+            type="button"
+            onclick="toggleProfileEdit()"
+            style="padding:0.5rem 1rem;border-radius:0.5rem;border:1px solid #D1D5DB;background:#fff;font-size:0.875rem;font-weight:700;cursor:pointer;"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            style="padding:0.5rem 1.25rem;border-radius:0.5rem;border:none;background:#1B5E20;color:#fff;font-size:0.875rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:0.375rem;"
+          >
+            <i data-lucide="save" style="width:1rem;height:1rem;"></i>
+            <span>Save Profile</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let isEditingProfile = false;
+
+function toggleProfileEdit() {
+  isEditingProfile = !isEditingProfile;
+  const viewEl = document.getElementById('profile-view-mode');
+  const editEl = document.getElementById('profile-edit-mode');
+  const btn = document.getElementById('profile-edit-toggle-btn');
+  const btnText = document.getElementById('profile-edit-btn-text');
+
+  if (isEditingProfile) {
+    viewEl.style.display = 'none';
+    editEl.style.display = 'block';
+    btn.style.background = '#fff';
+    btn.style.color = '#374151';
+    btn.style.border = '1px solid #D1D5DB';
+    btnText.innerText = 'Cancel';
+  } else {
+    viewEl.style.display = 'flex';
+    editEl.style.display = 'none';
+    btn.style.background = '#1B5E20';
+    btn.style.color = '#fff';
+    btn.style.border = 'none';
+    btnText.innerText = 'Edit Profile';
+  }
+}
+
+// India locations data in client script
+const allIndiaStatesData = {{ all_india_states|tojson }};
+
+function onProfileStateChange(selectedState) {
+  const distSelect = document.getElementById('district-select');
+  distSelect.innerHTML = '';
+  const found = allIndiaStatesData.find(s => s.name === selectedState);
+  if (found && found.districts) {
+    found.districts.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d.name;
+      opt.innerText = d.name;
+      distSelect.appendChild(opt);
+    });
+  }
+}
+</script>
+{% endblock %}

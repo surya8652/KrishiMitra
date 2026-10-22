@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="min-h-screen bg-[#F8FAFC] flex flex-col text-slate-900 font-sans">
+
+  <!-- Top Bar for Student Portal -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 md:px-6 py-2.5 shadow-xs">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+      <!-- Logo & Brand -->
+      <div class="flex items-center gap-3">
+        <button
+          type="button"
+          onclick="toggleStudentMenu()"
+          class="md:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100 cursor-pointer border-none bg-transparent"
+          aria-label="Toggle navigation"
+        >
+          <i data-lucide="menu" style="width:1.25rem;height:1.25rem;"></i>
+        </button>
+
+        <a href="{{ url_for('student_career_analyzer') }}" class="flex items-center gap-2.5 text-decoration-none">
+          <div style="height:2.5rem;width:2.5rem;border-radius:0.75rem;background:linear-gradient(to top right, #1D4ED8, #4F46E5);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 4px 6px -1px rgba(79,70,229,0.2);">
+            <i data-lucide="graduation-cap" style="width:1.5rem;height:1.5rem;"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span style="font-weight:800;font-size:1.125rem;letter-spacing:-0.025em;color:#0F172A;">
+                Student Career Hub
+              </span>
+              <span style="font-size:10px;text-transform:uppercase;font-weight:900;padding:0.125rem 0.375rem;border-radius:0.25rem;background:#EEF2FF;color:#4338CA;border:1px solid #C7D2FE;">
+                AI Guided
+              </span>
+            </div>
+            <p class="hidden sm:block" style="font-size:11px;color:#64748B;font-weight:500;margin:0;">
+              Architecture • Engineering • Math & Science Roadmaps
+            </p>
+          </div>
+        </a>
+      </div>
+
+      <!-- Desktop Nav Items -->
+      <nav class="hidden md:flex items-center gap-1.5" style="background:rgba(241,245,249,0.8);padding:0.25rem;border-radius:0.75rem;border:1px solid rgba(226,232,240,0.6);">
+        {% set snav = [
+          ('student_career_analyzer', t.get('careerAnalyzer', 'Career Analyzer'), 'compass'),
+          ('student_study_material', t.get('studyMaterial', 'Study Material'), 'book-open'),
+          ('student_youtube', t.get('youtubeLectures', 'YouTube Lectures'), 'play-circle'),
+          ('student_sectors', t.get('sectorGuide', 'Sector Guide'), 'layers')
+        ] %}
+        {% for route, label, icon in snav %}
+        {% set is_active = (request.endpoint == route) or (route == 'student_career_analyzer' and request.path in ['/students', '/students/analyzer']) %}
+        <a
+          href="{{ url_for(route) }}"
+          style="display:flex;align-items:center;gap:0.5rem;padding:0.375rem 0.75rem;border-radius:0.5rem;font-size:0.75rem;font-weight:700;text-decoration:none;transition:all 0.15s;{{ 'background:#fff;color:#4338CA;box-shadow:0 1px 2px rgba(0,0,0,0.05);' if is_active else 'color:#475569;' }}"
+        >
+          <i data-lucide="{{ icon }}" style="width:1rem;height:1rem;"></i>
+          <span>{{ label }}</span>
+        </a>
+        {% endfor %}
+      </nav>
+
+      <!-- Right Action Bar -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Language Selector -->
+        {% include "components/language_selector.html" %}
+
+        <!-- Student Auth status & Logout -->
+        {% if is_authenticated %}
+        <div class="flex items-center gap-2">
+          <span class="hidden sm:inline-flex items-center gap-1" style="padding:0.25rem 0.625rem;border-radius:9999px;font-size:0.75rem;font-weight:700;background:#EEF2FF;color:#4338CA;border:1px solid #C7D2FE;">
+            <i data-lucide="graduation-cap" style="width:0.875rem;height:0.875rem;"></i>
+            <span>Student Member</span>
+          </span>
+          <a
+            href="{{ url_for('api_logout') }}"
+            style="padding:0.25rem 0.625rem;border-radius:0.5rem;font-size:0.75rem;font-weight:600;color:#475569;border:1px solid #E2E8F0;text-decoration:none;"
+            onmouseover="this.style.color='#B91C1C';this.style.background='#FEF2F2'"
+            onmouseout="this.style.color='#475569';this.style.background='transparent'"
+          >
+            Sign Out
+          </a>
+        </div>
+        {% else %}
+        <a
+          href="{{ url_for('login') }}?redirect=/students"
+          style="font-size:0.75rem;font-weight:700;padding:0.375rem 0.75rem;border-radius:0.5rem;background:#4F46E5;color:#fff;text-decoration:none;"
+        >
+          Sign In
+        </a>
+        {% endif %}
+
+        <!-- Link to Home -->
+        <a
+          href="{{ url_for('landing') }}"
+          style="display:inline-flex;align-items:center;gap:0.25rem;font-size:0.75rem;font-weight:600;color:#64748B;padding:0.375rem 0.5rem;border-radius:0.5rem;text-decoration:none;"
+        >
+          <i data-lucide="arrow-left" style="width:0.875rem;height:0.875rem;"></i>
+          <span class="hidden sm:inline">Home</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Mobile Dropdown Nav -->
+    <div id="student-mobile-menu" style="display:none;padding-top:0.75rem;padding-bottom:0.5rem;border-top:1px solid #E2E8F0;margin-top:0.5rem;" class="space-y-1 md:hidden">
+      {% for route, label, icon in snav %}
+      <a
+        href="{{ url_for(route) }}"
+        style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem 0.75rem;border-radius:0.5rem;font-size:0.875rem;font-weight:700;color:#334155;text-decoration:none;"
+      >
+        <i data-lucide="{{ icon }}" style="width:1rem;height:1rem;color:#4F46E5;"></i>
+        <span>{{ label }}</span>
+      </a>
+      {% endfor %}
+      <div style="padding-top:0.5rem;border-top:1px solid #F1F5F9;margin-top:0.5rem;padding-left:0.75rem;">
+        {% if is_authenticated %}
+        <a href="{{ url_for('api_logout') }}" style="color:#DC2626;font-weight:700;font-size:0.75rem;text-decoration:none;">Sign Out</a>
+        {% else %}
+        <a href="{{ url_for('login') }}?redirect=/students" style="color:#4F46E5;font-weight:700;font-size:0.75rem;text-decoration:none;">Sign In</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Outlet -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer style="background:#0F172A;color:#CBD5E1;padding:2rem 1rem;border-top:1px solid #1E293B;font-size:0.75rem;margin-top:3rem;">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <i data-lucide="graduation-cap" style="width:1.25rem;height:1.25rem;color:#818CF8;"></i>
+        <span style="font-weight:700;color:#fff;font-size:0.875rem;">Student Career & Study Hub</span>
+        <span style="color:#64748B;">•</span>
+        <span style="color:#94A3B8;">Architecture, Engineering & Science Pathways</span>
+      </div>
+      <div class="flex items-center gap-4" style="color:#94A3B8;">
+        <a href="{{ url_for('student_career_analyzer') }}" style="color:#94A3B8;text-decoration:none;">Analyzer</a>
+        <a href="{{ url_for('student_study_material') }}" style="color:#94A3B8;text-decoration:none;">Notes</a>
+        <a href="{{ url_for('student_youtube') }}" style="color:#94A3B8;text-decoration:none;">YouTube</a>
+        <a href="{{ url_for('student_sectors') }}" style="color:#94A3B8;text-decoration:none;">Sectors</a>
+        <a href="{{ url_for('farmer_dashboard') }}" style="color:#34D399;text-decoration:none;">Farmer App</a>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+function toggleStudentMenu() {
+  const m = document.getElementById('student-mobile-menu');
+  m.style.display = m.style.display === 'none' ? 'block' : 'none';
+}
+</script>
+{% endblock %}

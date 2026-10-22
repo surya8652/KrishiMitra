@@ -1,0 +1,183 @@
+{% extends "layouts/farmer.html" %}
+{% block title %}Smart Farming Advice — KrishiMitra AI{% endblock %}
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div style="display:flex;align-items:flex-start;gap:0.75rem;">
+    <div style="padding:0.5rem;border-radius:0.5rem;background:#E8F5E9;color:#1B5E20;">
+      <i data-lucide="sprout" style="width:1.5rem;height:1.5rem;"></i>
+    </div>
+    <div>
+      <h1 style="font-size:clamp(1.5rem,4vw,2rem);font-weight:900;color:#111827;">Get Advice for Your Farm</h1>
+      <p style="font-size:0.875rem;color:#6B7280;">Tell us about your soil and crops to receive tailored seasonal agricultural recommendations.</p>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr;gap:1.5rem;">
+
+    <!-- Form -->
+    <div style="background:#fff;border-radius:1rem;border:1px solid #D1D5DB;padding:1.5rem;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+      <h2 style="font-weight:700;font-size:1.05rem;color:#111827;margin-bottom:0.25rem;">Farm Information Form</h2>
+      <p style="font-size:0.75rem;color:#9CA3AF;margin-bottom:1rem;">Fill in your farm details below</p>
+
+      <form method="GET" action="{{ url_for('farmer_smart_farming') }}" class="space-y-4" id="farmForm">
+        <div>
+          <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.375rem;">
+            <i data-lucide="map-pin" style="width:0.875rem;height:0.875rem;display:inline;margin-right:0.25rem;color:#1B5E20;"></i>
+            Farm Location
+          </label>
+          <input type="text" name="location" value="{{ farmer.get('village','Village') }}, {{ farmer.get('district','Nashik') }}"
+            style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;box-sizing:border-box;" />
+        </div>
+        <div>
+          <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.375rem;">
+            <i data-lucide="layers" style="width:0.875rem;height:0.875rem;display:inline;margin-right:0.25rem;color:#1B5E20;"></i>
+            Soil Type
+          </label>
+          <select name="soilType" style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;background:#fff;box-sizing:border-box;">
+            <option {{ 'selected' if 'Black' in farmer.get('soilType','') else '' }}>Medium Black Clayey Loam (काळी माती)</option>
+            <option>Deep Black Cotton Soil</option>
+            <option>Fertile Alluvial Loam (गाळाची माती)</option>
+            <option>Red Loamy Soil (तांबडी माती)</option>
+            <option>Sandy Desert Loam</option>
+            <option>Laterite Mountain Soil</option>
+          </select>
+        </div>
+        <div>
+          <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.375rem;">
+            <i data-lucide="sprout" style="width:0.875rem;height:0.875rem;display:inline;margin-right:0.25rem;color:#1B5E20;"></i>
+            Crop Type
+          </label>
+          <input type="text" name="crop" value="{{ farmer.get('mainCrops',['Tomato'])[0] }}"
+            style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;box-sizing:border-box;" />
+        </div>
+        <div>
+          <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.375rem;">
+            <i data-lucide="calendar" style="width:0.875rem;height:0.875rem;display:inline;margin-right:0.25rem;color:#1B5E20;"></i>
+            Current Season
+          </label>
+          <select name="season" style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;background:#fff;box-sizing:border-box;">
+            <option>Rabi (Winter Planting)</option>
+            <option>Kharif (Monsoon Planting)</option>
+            <option>Zaid (Summer Crop)</option>
+          </select>
+        </div>
+        <div>
+          <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.375rem;">
+            <i data-lucide="cloud-rain" style="width:0.875rem;height:0.875rem;display:inline;margin-right:0.25rem;color:#1B5E20;"></i>
+            Rainfall Condition
+          </label>
+          <select name="rainfall" style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;background:#fff;box-sizing:border-box;">
+            <option>Moderate Expected (Thunderstorm Season)</option>
+            <option>Dry — No Rain Expected</option>
+            <option>Heavy Monsoon Rains</option>
+            <option>Post-Monsoon Residual Moisture</option>
+          </select>
+        </div>
+        <button type="button" onclick="generateAdvice()" class="btn btn-primary" style="width:100%;font-size:0.9rem;gap:0.5rem;" id="generateBtn">
+          <i data-lucide="sprout" style="width:1rem;height:1rem;"></i>
+          <span>Get My Farm Advice</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Advice Result -->
+    <div id="adviceResult">
+      {% if farm_advice %}
+      {% set a = farm_advice[0] %}
+      <div style="background:#fff;border-radius:1rem;border:1px solid #E5E7EB;padding:1.5rem;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <div style="border-bottom:1px solid #F3F4F6;padding-bottom:1rem;margin-bottom:1rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.5rem;">
+            <span style="font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:#9CA3AF;">Latest Advisory / शेती सल्ला</span>
+            <span style="font-size:0.7rem;font-weight:600;padding:0.125rem 0.5rem;border-radius:9999px;background:#E8F5E9;color:#1B5E20;border:1px solid #A7F3D0;">{{ a.get('season','Rabi') }}</span>
+          </div>
+          <h2 style="font-size:1.25rem;font-weight:900;color:#111827;margin-bottom:0.25rem;">{{ a.get('primaryCrop','Tomato') }} Farming Plan</h2>
+          <p style="font-size:0.75rem;color:#9CA3AF;">{{ a.get('location','Farm') }} • {{ a.get('date','') }}</p>
+        </div>
+
+        <!-- Soil Analysis -->
+        <div style="padding:1rem;border-radius:0.75rem;background:#F1F8F3;border:1px solid #C8E6C9;margin-bottom:1rem;">
+          <h4 style="font-size:0.8rem;font-weight:700;color:#1B5E20;margin-bottom:0.5rem;">🌱 Soil Analysis</h4>
+          <p style="font-size:0.875rem;color:#374151;line-height:1.65;">{{ a.get('soilAnalysis',a.get('advice','Good conditions for farming.')) }}</p>
+        </div>
+
+        <!-- Key Recommendations -->
+        {% if a.get('recommendations') %}
+        <div style="margin-bottom:1rem;">
+          <h4 style="font-size:0.8rem;font-weight:700;color:#1B5E20;margin-bottom:0.5rem;">✅ Key Recommendations</h4>
+          <div style="display:flex;flex-direction:column;gap:0.5rem;">
+            {% for rec in a.recommendations %}
+            <div style="padding:0.75rem;border-radius:0.75rem;background:#F8F9F5;border:1px solid #F3F4F6;font-size:0.875rem;color:#374151;line-height:1.6;display:flex;align-items:flex-start;gap:0.5rem;">
+              <i data-lucide="check-circle-2" style="width:1rem;height:1rem;color:#2E7D32;flex-shrink:0;margin-top:0.125rem;"></i>
+              <span>{{ rec }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <button onclick="window.print()" style="display:inline-flex;align-items:center;gap:0.5rem;font-size:0.8rem;font-weight:700;padding:0.5rem 1rem;border-radius:0.5rem;border:1px solid #D1D5DB;background:#fff;cursor:pointer;">
+          <i data-lucide="download" style="width:1rem;height:1rem;"></i>
+          Download PDF Advisory
+        </button>
+      </div>
+      {% else %}
+      <div style="background:#F8F9F5;border-radius:1rem;border:2px dashed #D1D5DB;padding:3rem;text-align:center;">
+        <i data-lucide="file-text" style="width:3rem;height:3rem;color:#D1D5DB;margin:0 auto 0.75rem;display:block;"></i>
+        <h3 style="font-weight:700;color:#374151;margin-bottom:0.25rem;">No Advice Generated Yet</h3>
+        <p style="font-size:0.875rem;color:#9CA3AF;">Fill in the form and click "Get My Farm Advice" to receive personalized guidance.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+function generateAdvice() {
+  const btn = document.getElementById('generateBtn');
+  btn.innerHTML = '<i data-lucide="loader" style="width:1rem;height:1rem;animation:spin 1s linear infinite;"></i> Generating advice...';
+  btn.disabled = true;
+  if (window.lucide) lucide.createIcons();
+
+  // Show mock advice after 1.5 seconds
+  setTimeout(() => {
+    const result = document.getElementById('adviceResult');
+    result.innerHTML = `
+      <div style="background:#fff;border-radius:1rem;border:1px solid #E5E7EB;padding:1.5rem;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <div style="border-bottom:1px solid #F3F4F6;padding-bottom:1rem;margin-bottom:1rem;">
+          <span style="font-size:0.7rem;font-weight:800;text-transform:uppercase;color:#9CA3AF;">Latest Advisory / शेती सल्ला</span>
+          <h2 style="font-size:1.25rem;font-weight:900;color:#111827;margin-top:0.25rem;">Personalized Farm Advisory Generated</h2>
+        </div>
+        <div style="padding:1rem;border-radius:0.75rem;background:#F1F8F3;border:1px solid #C8E6C9;margin-bottom:1rem;">
+          <h4 style="font-size:0.8rem;font-weight:700;color:#1B5E20;margin-bottom:0.5rem;">🌱 Soil Analysis</h4>
+          <p style="font-size:0.875rem;color:#374151;line-height:1.65;">Your medium black soil has good water retention capacity. pH levels appear suitable for tomato cultivation (6.2–6.8). Apply lime if pH falls below 6.0. Pre-season deep ploughing to 15cm depth recommended for aeration.</p>
+        </div>
+        <div style="margin-bottom:1rem;">
+          <h4 style="font-size:0.8rem;font-weight:700;color:#1B5E20;margin-bottom:0.5rem;">✅ Key Recommendations</h4>
+          <div style="display:flex;flex-direction:column;gap:0.5rem;">
+            ${['Apply 10 tonnes FYM per acre 3 weeks before planting for base nutrition',
+               'Install drip irrigation: set timer for 30-min cycles at 6 AM and 5 PM daily',
+               'Use hybrid tomato seedlings (Pusa Ruby or MAHYCO 101) for better yield',
+               'Apply Trichoderma biofungicide to soil @ 2.5kg/acre as root protection',
+               'Scout regularly for early blight and leaf miner from 4th week after transplanting'].map(r => 
+              `<div style="padding:0.75rem;border-radius:0.75rem;background:#F8F9F5;border:1px solid #F3F4F6;font-size:0.875rem;color:#374151;line-height:1.6;display:flex;align-items:flex-start;gap:0.5rem;">
+                <span style="color:#2E7D32;font-weight:700;flex-shrink:0;">✓</span>
+                <span>${r}</span>
+              </div>`).join('')}
+          </div>
+        </div>
+        <div style="padding:0.75rem;border-radius:0.75rem;background:#FFF8E1;border:1px solid #FFE082;font-size:0.75rem;color:#92400E;margin-bottom:1rem;">
+          <strong>⚠ Note: </strong>This advisory is AI-generated. For district-specific guidance, contact your KVK officer or agriculture extension center.
+        </div>
+        <button onclick="window.print()" style="display:inline-flex;align-items:center;gap:0.5rem;font-size:0.8rem;font-weight:700;padding:0.5rem 1rem;border-radius:0.5rem;border:1px solid #D1D5DB;background:#fff;cursor:pointer;">
+          Download PDF Advisory
+        </button>
+      </div>`;
+    btn.innerHTML = '<span>Get My Farm Advice</span>';
+    btn.disabled = false;
+  }, 1500);
+}
+</script>
+<style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+{% endblock %}

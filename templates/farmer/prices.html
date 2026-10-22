@@ -1,0 +1,168 @@
+{% extends "layouts/farmer.html" %}
+{% block title %}Crop Prices — KrishiMitra AI{% endblock %}
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div style="display:flex;flex-direction:column;gap:1rem;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+      <div style="display:flex;align-items:flex-start;gap:0.75rem;">
+        <div style="padding:0.5rem;border-radius:0.5rem;background:#FEF3C7;color:#92400E;">
+          <i data-lucide="trending-up" style="width:1.5rem;height:1.5rem;"></i>
+        </div>
+        <div>
+          <h1 style="font-size:clamp(1.5rem,4vw,2rem);font-weight:900;color:#111827;">Check Crop Prices (All-India Mandis)</h1>
+          <p style="font-size:0.875rem;color:#6B7280;">Live APMC mandi rates, nearby market comparison, and price movement across India.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if prices %}
+  {% set active = prices[0] %}
+
+  <!-- Crop Selector Tabs -->
+  <div style="background:#fff;padding:0.875rem;border-radius:1rem;border:1px solid #E5E7EB;display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;overflow-x:auto;">
+    <span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#9CA3AF;flex-shrink:0;margin-right:0.25rem;">Crop:</span>
+    {% for p in prices %}
+    <a href="#price_{{ p.id }}" onclick="showPrice('{{ p.id }}')" id="tab_{{ p.id }}"
+      style="padding:0.5rem 0.875rem;border-radius:0.75rem;font-size:0.875rem;font-weight:700;white-space:nowrap;cursor:pointer;text-decoration:none;transition:all 150ms;{{ 'background:#1B5E20;color:#fff;' if loop.first else 'background:#F3F4F6;color:#374151;' }}"
+      class="price-tab">
+      {{ p.crop }}
+    </a>
+    {% endfor %}
+  </div>
+
+  <!-- Main Price Cards -->
+  {% for p in prices %}
+  <div id="price_{{ p.id }}" class="price-panel" style="{{ '' if loop.first else 'display:none;' }}">
+    <div style="background:#fff;border-radius:1.5rem;border:2px solid #FDE68A;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+
+      <!-- Price Headline -->
+      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:1rem;border-bottom:1px solid #F3F4F6;padding-bottom:1.25rem;margin-bottom:1.25rem;">
+        <div>
+          <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.5rem;">
+            <span style="font-size:0.7rem;font-weight:700;padding:0.125rem 0.5rem;border-radius:9999px;background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;">{{ p.variety }}</span>
+            <span style="font-size:0.75rem;color:#374151;font-weight:700;display:flex;align-items:center;gap:0.25rem;">
+              <i data-lucide="building-2" style="width:0.875rem;height:0.875rem;color:#1B5E20;"></i>
+              {{ p.market }} • {{ p.district }} ({{ p.state }})
+            </span>
+          </div>
+          <h2 style="font-size:2rem;font-weight:900;color:#111827;">₹{{ '{:,}'.format(p.modalPrice) }} <span style="font-size:0.875rem;font-weight:400;color:#9CA3AF;">{{ p.unit }}</span></h2>
+          <p style="font-size:0.75rem;color:#9CA3AF;margin-top:0.25rem;">
+            Equivalent to approx. ₹{{ '%.1f' | format(p.modalPrice / 100) }} / kg at farm mandi gate
+          </p>
+        </div>
+
+        <!-- Trend Badge -->
+        <div style="display:flex;align-items:center;gap:0.5rem;padding:0.875rem;border-radius:1rem;{{ 'background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;' if p.trend == 'up' else ('background:#FFF1F2;color:#9F1239;border:1px solid #FECDD3;' if p.trend == 'down' else 'background:#F3F4F6;color:#374151;border:1px solid #E5E7EB;') }}">
+          {% if p.trend == 'up' %}
+          <i data-lucide="trending-up" style="width:1.5rem;height:1.5rem;color:#16A34A;"></i>
+          {% elif p.trend == 'down' %}
+          <i data-lucide="trending-down" style="width:1.5rem;height:1.5rem;color:#E11D48;"></i>
+          {% else %}
+          <i data-lucide="minus" style="width:1.5rem;height:1.5rem;color:#6B7280;"></i>
+          {% endif %}
+          <div>
+            <div style="font-size:0.875rem;font-weight:900;">{{ '+' if p.changePercent > 0 else '' }}{{ p.changePercent }}%</div>
+            <div style="font-size:0.625rem;font-weight:500;opacity:0.8;">7-Day Trend</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Min/Modal/Max Band -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;background:#F8F9F5;border-radius:1rem;border:1px solid #E5E7EB;overflow:hidden;margin-bottom:1.25rem;">
+        <div style="padding:1rem;">
+          <span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#9CA3AF;display:block;">Minimum Price</span>
+          <div style="font-size:1.25rem;font-weight:800;color:#111827;margin-top:0.25rem;">₹{{ '{:,}'.format(p.minPrice) }}</div>
+          <span style="font-size:0.675rem;color:#9CA3AF;">Lower arrivals quality</span>
+        </div>
+        <div style="padding:1rem;border-left:1px solid #E5E7EB;border-right:1px solid #E5E7EB;">
+          <span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#1B5E20;display:block;">Modal (Most Common)</span>
+          <div style="font-size:1.5rem;font-weight:900;color:#1B5E20;margin-top:0.25rem;">₹{{ '{:,}'.format(p.modalPrice) }}</div>
+          <span style="font-size:0.675rem;color:#059669;font-weight:600;">Fair average quality</span>
+        </div>
+        <div style="padding:1rem;">
+          <span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#9CA3AF;display:block;">Maximum Price</span>
+          <div style="font-size:1.25rem;font-weight:800;color:#111827;margin-top:0.25rem;">₹{{ '{:,}'.format(p.maxPrice) }}</div>
+          <span style="font-size:0.675rem;color:#9CA3AF;">Premium Grade A lot</span>
+        </div>
+      </div>
+
+      <!-- 7-Day History -->
+      {% if p.get('historical') %}
+      <div style="margin-bottom:1.25rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+          <h3 style="font-weight:800;font-size:1rem;color:#111827;">7-Day Daily Mandi Price Movement</h3>
+          <span style="font-size:0.7rem;color:#9CA3AF;">Official Agmarknet Mandi Record</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:0.375rem;text-align:center;">
+          {% for h in p.historical %}
+          <div style="padding:0.625rem 0.25rem;border-radius:0.75rem;background:#F9FAFB;border:1px solid #F3F4F6;">
+            <span style="font-size:0.675rem;font-weight:600;color:#9CA3AF;display:block;">{{ h.date }}</span>
+            <span style="font-size:0.8rem;font-weight:800;color:#111827;display:block;margin-top:0.25rem;">₹{{ h.price }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Nearby Mandis -->
+      {% if p.get('nearbyMandis') %}
+      <div style="margin-bottom:1.25rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            <i data-lucide="store" style="width:1rem;height:1rem;color:#1B5E20;"></i>
+            <h3 style="font-weight:800;font-size:1rem;color:#111827;">Nearby Mandi Comparison for {{ p.crop }}</h3>
+          </div>
+          <span style="font-size:0.7rem;color:#9CA3AF;">Compare before dispatching trucks</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0.75rem;">
+          {% for m in p.nearbyMandis %}
+          <div style="padding:0.875rem;border-radius:0.75rem;background:#fff;border:1px solid #E5E7EB;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+              <span style="font-weight:700;font-size:0.875rem;color:#111827;">{{ m.market }}</span>
+              <span style="font-size:0.7rem;color:#9CA3AF;font-weight:600;">{{ m.distanceKm }} km</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;">
+              <span style="font-size:1rem;font-weight:800;color:#1B5E20;">₹{{ m.price }} / Qtl</span>
+              <span style="font-size:0.675rem;color:#9CA3AF;">Arr: {{ m.arrivalQty }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Mandi Advice -->
+      {% if p.get('estimatedPriceRange') %}
+      <div style="padding:1rem;border-radius:0.75rem;background:#E8F5E9;border:1px solid #C8E6C9;display:flex;align-items:flex-start;gap:0.75rem;">
+        <i data-lucide="check-circle-2" style="width:1.25rem;height:1.25rem;color:#1B5E20;flex-shrink:0;margin-top:0.125rem;"></i>
+        <div>
+          <strong style="font-weight:700;color:#1B5E20;display:block;font-size:0.9rem;margin-bottom:0.25rem;">Mandi Intelligence Note:</strong>
+          <p style="font-size:0.8rem;color:#374151;line-height:1.6;">{{ p.estimatedPriceRange }}. Sort your crop by uniform grading before transport to capture the top 10% price bracket.</p>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+
+  {% else %}
+  <p style="text-align:center;color:#9CA3AF;padding:3rem;">No price data available right now.</p>
+  {% endif %}
+</div>
+
+<script>
+function showPrice(id) {
+  document.querySelectorAll('.price-panel').forEach(p => p.style.display = 'none');
+  document.getElementById('price_' + id).style.display = 'block';
+  document.querySelectorAll('.price-tab').forEach(t => {
+    t.style.background = '#F3F4F6';
+    t.style.color = '#374151';
+  });
+  document.getElementById('tab_' + id).style.background = '#1B5E20';
+  document.getElementById('tab_' + id).style.color = '#fff';
+}
+</script>
+{% endblock %}

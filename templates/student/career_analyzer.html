@@ -1,0 +1,334 @@
+{% extends "layouts/student.html" %}
+{% block title %}AI Career & Stream Analyzer — KrishiMitra AI{% endblock %}
+{% block content %}
+<div class="space-y-8">
+
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+    <div class="flex items-center gap-3">
+      <div style="padding:0.75rem;border-radius:1rem;background:#EEF2FF;color:#4338CA;">
+        <i data-lucide="compass" style="width:1.75rem;height:1.75rem;"></i>
+      </div>
+      <div>
+        <h1 style="font-size:1.75rem;font-weight:900;color:#0F172A;line-height:1.2;">
+          AI Career & Stream Analyzer
+        </h1>
+        <p style="font-size:0.875rem;color:#64748B;">
+          Specialized engine for students strong in Mathematics, Spatial Architecture, Computing & Sciences
+        </p>
+      </div>
+    </div>
+
+    <!-- Quick Presets -->
+    <div class="flex items-center gap-2 flex-wrap">
+      <span style="font-size:0.75rem;font-weight:700;color:#64748B;">Quick Demo Profiles:</span>
+      <button
+        type="button"
+        onclick="applyPreset('math-high')"
+        style="padding:0.375rem 0.625rem;border-radius:0.5rem;font-size:0.75rem;font-weight:700;border:1px solid #CBD5E1;background:#fff;color:#1E293B;cursor:pointer;"
+      >
+        📐 High Maths (95%)
+      </button>
+      <button
+        type="button"
+        onclick="applyPreset('spatial-architect')"
+        style="padding:0.375rem 0.625rem;border-radius:0.5rem;font-size:0.75rem;font-weight:700;border:1px solid #CBD5E1;background:#fff;color:#1E293B;cursor:pointer;"
+      >
+        🏛️ Architect (Math + Drawing)
+      </button>
+      <button
+        type="button"
+        onclick="applyPreset('tech-coder')"
+        style="padding:0.375rem 0.625rem;border-radius:0.5rem;font-size:0.75rem;font-weight:700;border:1px solid #CBD5E1;background:#fff;color:#1E293B;cursor:pointer;"
+      >
+        💻 CS & Coding
+      </button>
+    </div>
+  </div>
+
+  <!-- Form and Input Grid -->
+  <div style="background:#fff;border-radius:1.5rem;border:1px solid #E2E8F0;box-shadow:0 1px 3px rgba(0,0,0,0.03);overflow:hidden;">
+    <div style="padding:1.25rem 1.5rem;background:#F8FAFC;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <h3 style="font-size:1.125rem;font-weight:800;color:#0F172A;">Enter Your Academic Profile & Marks</h3>
+        <p style="font-size:0.75rem;color:#64748B;">Provide approximate percentage scores across core disciplines.</p>
+      </div>
+      <span style="font-size:0.75rem;font-weight:700;padding:0.25rem 0.625rem;border-radius:9999px;background:#EEF2FF;color:#4338CA;">
+        Step 1 of 2
+      </span>
+    </div>
+
+    <form action="{{ url_for('api_student_analyze') }}" method="POST" style="padding:1.5rem;display:flex;flex-direction:column;gap:1.5rem;">
+      <!-- Qualification & Target Year -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:1rem;">
+        <div>
+          <label style="display:block;font-size:0.75rem;font-weight:700;color:#475569;text-transform:uppercase;margin-bottom:0.25rem;">
+            Current Academic Level
+          </label>
+          <select name="qualification" style="width:100%;height:2.75rem;border-radius:0.5rem;border:1px solid #CBD5E1;padding:0 0.75rem;background:#fff;font-size:0.875rem;">
+            <option value="11th-12th PCM" selected>11th / 12th Standard (PCM - Physics, Chem, Math)</option>
+            <option value="11th-12th PCB">11th / 12th Standard (PCB - Physics, Chem, Bio)</option>
+            <option value="10th Standard">10th Standard Passing Out</option>
+            <option value="Diploma / Poly">Polytechnic / Engineering Diploma</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="display:block;font-size:0.75rem;font-weight:700;color:#475569;text-transform:uppercase;margin-bottom:0.25rem;">
+            Preferred Focus Sector (Optional)
+          </label>
+          <select id="desiredSector" name="desiredSector" style="width:100%;height:2.75rem;border-radius:0.5rem;border:1px solid #CBD5E1;padding:0 0.75rem;background:#fff;font-size:0.875rem;">
+            <option value="" selected>All Sectors (Full AI Exploration)</option>
+            {% for sec in career_sectors %}
+            <option value="{{ sec.id }}">{{ sec.title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <!-- Marks Inputs (Sliders / Numbers) -->
+      <div>
+        <label style="display:block;font-size:0.75rem;font-weight:700;color:#475569;text-transform:uppercase;margin-bottom:0.75rem;">
+          Subject Score Breakdown (0 - 100%)
+        </label>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:1rem;">
+          <div style="background:#F8FAFC;padding:0.75rem;border-radius:0.75rem;border:1px solid #E2E8F0;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.25rem;">
+              <span style="font-size:0.75rem;font-weight:700;color:#1E293B;">📐 Mathematics</span>
+              <span id="val-math" style="font-size:0.75rem;font-weight:800;color:#4338CA;">92%</span>
+            </div>
+            <input type="range" id="input-math" name="math" min="0" max="100" value="92" oninput="document.getElementById('val-math').innerText = this.value + '%'" style="width:100%;accent-color:#4F46E5;" />
+          </div>
+
+          <div style="background:#F8FAFC;padding:0.75rem;border-radius:0.75rem;border:1px solid #E2E8F0;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.25rem;">
+              <span style="font-size:0.75rem;font-weight:700;color:#1E293B;">⚡ Physics</span>
+              <span id="val-physics" style="font-size:0.75rem;font-weight:800;color:#4338CA;">70%</span>
+            </div>
+            <input type="range" id="input-physics" name="physics" min="0" max="100" value="70" oninput="document.getElementById('val-physics').innerText = this.value + '%'" style="width:100%;accent-color:#4F46E5;" />
+          </div>
+
+          <div style="background:#F8FAFC;padding:0.75rem;border-radius:0.75rem;border:1px solid #E2E8F0;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.25rem;">
+              <span style="font-size:0.75rem;font-weight:700;color:#1E293B;">🧪 Chemistry</span>
+              <span id="val-chemistry" style="font-size:0.75rem;font-weight:800;color:#4338CA;">52%</span>
+            </div>
+            <input type="range" id="input-chemistry" name="chemistry" min="0" max="100" value="52" oninput="document.getElementById('val-chemistry').innerText = this.value + '%'" style="width:100%;accent-color:#4F46E5;" />
+          </div>
+
+          <div style="background:#F8FAFC;padding:0.75rem;border-radius:0.75rem;border:1px solid #E2E8F0;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.25rem;">
+              <span style="font-size:0.75rem;font-weight:700;color:#1E293B;">🌿 Biology</span>
+              <span id="val-biology" style="font-size:0.75rem;font-weight:800;color:#4338CA;">38%</span>
+            </div>
+            <input type="range" id="input-biology" name="biology" min="0" max="100" value="38" oninput="document.getElementById('val-biology').innerText = this.value + '%'" style="width:100%;accent-color:#4F46E5;" />
+          </div>
+
+          <div style="background:#F8FAFC;padding:0.75rem;border-radius:0.75rem;border:1px solid #E2E8F0;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.25rem;">
+              <span style="font-size:0.75rem;font-weight:700;color:#1E293B;">💻 Computer Science</span>
+              <span id="val-cs" style="font-size:0.75rem;font-weight:800;color:#4338CA;">80%</span>
+            </div>
+            <input type="range" id="input-cs" name="computerScience" min="0" max="100" value="80" oninput="document.getElementById('val-cs').innerText = this.value + '%'" style="width:100%;accent-color:#4F46E5;" />
+          </div>
+
+          <div style="background:#F8FAFC;padding:0.75rem;border-radius:0.75rem;border:1px solid #E2E8F0;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.25rem;">
+              <span style="font-size:0.75rem;font-weight:700;color:#1E293B;">🎨 Drawing & Aesthetics</span>
+              <span id="val-drawing" style="font-size:0.75rem;font-weight:800;color:#4338CA;">78%</span>
+            </div>
+            <input type="range" id="input-drawing" name="drawingAesthetics" min="0" max="100" value="78" oninput="document.getElementById('val-drawing').innerText = this.value + '%'" style="width:100%;accent-color:#4F46E5;" />
+          </div>
+
+          <div style="background:#F8FAFC;padding:0.75rem;border-radius:0.75rem;border:1px solid #E2E8F0;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.25rem;">
+              <span style="font-size:0.75rem;font-weight:700;color:#1E293B;">📚 English / Verbal</span>
+              <span id="val-english" style="font-size:0.75rem;font-weight:800;color:#4338CA;">72%</span>
+            </div>
+            <input type="range" id="input-english" name="englishLang" min="0" max="100" value="72" oninput="document.getElementById('val-english').innerText = this.value + '%'" style="width:100%;accent-color:#4F46E5;" />
+          </div>
+
+          <div style="background:#F8FAFC;padding:0.75rem;border-radius:0.75rem;border:1px solid #E2E8F0;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.25rem;">
+              <span style="font-size:0.75rem;font-weight:700;color:#1E293B;">📊 Social / Economics</span>
+              <span id="val-social" style="font-size:0.75rem;font-weight:800;color:#4338CA;">60%</span>
+            </div>
+            <input type="range" id="input-social" name="socialOrCommerce" min="0" max="100" value="60" oninput="document.getElementById('val-social').innerText = this.value + '%'" style="width:100%;accent-color:#4F46E5;" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Interests Checklist -->
+      <div>
+        <label style="display:block;font-size:0.75rem;font-weight:700;color:#475569;text-transform:uppercase;margin-bottom:0.75rem;">
+          Select Activities & Areas You Truly Enjoy:
+        </label>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:0.75rem;">
+          {% set interest_opts = [
+            'Designing 3D buildings & physical structures',
+            'Solving tough mathematical & geometric puzzles',
+            'Writing code, algorithms & software apps',
+            'Hands-on machinery, robotics & engines',
+            'Human health, biology & medical research',
+            'Financial markets, statistics & economic modeling',
+            'Urban planning, sustainable cities & environment',
+            'Visual sketching, digital art & graphic aesthetics',
+            'Laboratory experiments & chemical reactions'
+          ] %}
+          {% for opt in interest_opts %}
+          <label style="display:flex;align-items:center;gap:0.625rem;padding:0.625rem 0.75rem;border-radius:0.5rem;background:#F8FAFC;border:1px solid #E2E8F0;font-size:0.75rem;font-weight:600;color:#334155;cursor:pointer;">
+            <input type="checkbox" name="interests" value="{{ opt }}" class="interest-chk" {% if loop.index <= 3 %}checked{% endif %} style="accent-color:#4F46E5;width:1rem;height:1rem;" />
+            <span>{{ opt }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        style="width:100%;background:#4F46E5;color:#fff;font-weight:800;font-size:1rem;padding:0.875rem;border-radius:0.75rem;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;box-shadow:0 4px 6px -1px rgba(79,70,229,0.25);"
+      >
+        <i data-lucide="sparkles" style="width:1.25rem;height:1.25rem;"></i>
+        <span>Run Deep AI Career Recommendation</span>
+      </button>
+    </form>
+  </div>
+
+  <!-- RECOMMENDATION RESULTS -->
+  {% if analysis_result %}
+  <div class="space-y-6">
+    <!-- Divergence Alert Banner if Math is dominant -->
+    {% set first_rec = analysis_result[0] if analysis_result|length > 0 else None %}
+    {% if first_rec and first_rec.get('divergenceHighlight') %}
+    <div style="background:linear-gradient(to right, #EEF2FF, #E0E7FF);border:1px solid #C7D2FE;border-radius:1rem;padding:1.25rem;display:flex;align-items:flex-start;gap:0.75rem;">
+      <i data-lucide="award" style="width:1.5rem;height:1.5rem;color:#4338CA;flex-shrink:0;"></i>
+      <div>
+        <h4 style="font-weight:800;font-size:0.9375rem;color:#312E81;">High Mathematics Leverage Detected</h4>
+        <p style="font-size:0.8125rem;color:#3730A3;margin-top:0.25rem;line-height:1.4;">
+          {{ first_rec.get('divergenceHighlight') }}
+        </p>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="flex items-center justify-between">
+      <h2 style="font-size:1.25rem;font-weight:800;color:#0F172A;">
+        Top Career Matches Ranked For You ({{ analysis_result|length }} Sectors)
+      </h2>
+      <button onclick="window.print()" style="padding:0.375rem 0.75rem;border-radius:0.5rem;border:1px solid #CBD5E1;background:#fff;font-size:0.75rem;font-weight:700;display:flex;align-items:center;gap:0.25rem;cursor:pointer;">
+        <i data-lucide="printer" style="width:0.875rem;height:0.875rem;"></i>
+        <span>Print Report</span>
+      </button>
+    </div>
+
+    <!-- Ranked Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {% for item in analysis_result %}
+      {% set sec = item.sector %}
+      <div style="background:#fff;border-radius:1.25rem;border:1px solid #E2E8F0;box-shadow:0 1px 3px rgba(0,0,0,0.03);overflow:hidden;display:flex;flex-direction:column;justify-content:between;">
+        <div style="padding:1.25rem;">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;margin-bottom:0.75rem;">
+            <div>
+              <span style="font-size:0.7rem;font-weight:700;padding:0.125rem 0.5rem;border-radius:9999px;background:#F1F5F9;color:#475569;">
+                {{ sec.category }}
+              </span>
+              <h3 style="font-size:1.125rem;font-weight:800;color:#0F172A;margin-top:0.25rem;">{{ sec.title }}</h3>
+            </div>
+            <!-- Match Badge -->
+            <div style="text-align:right;">
+              <span style="font-size:1.5rem;font-weight:900;color:#4338CA;">{{ item.matchPercentage }}%</span>
+              <span style="font-size:0.65rem;color:#64748B;display:block;font-weight:700;text-transform:uppercase;">Match Score</span>
+            </div>
+          </div>
+
+          <p style="font-size:0.8125rem;color:#475569;margin-bottom:1rem;line-height:1.4;">{{ sec.tagline }}</p>
+
+          <!-- Why you match points -->
+          <div style="background:#F8FAFC;border-radius:0.75rem;padding:0.75rem;margin-bottom:0.75rem;border:1px solid #E2E8F0;">
+            <span style="font-size:0.7rem;font-weight:800;color:#334155;text-transform:uppercase;display:block;margin-bottom:0.375rem;">
+              Why This Fits Your Profile:
+            </span>
+            <ul style="padding-left:1.25rem;margin:0;font-size:0.75rem;color:#475569;line-height:1.4;">
+              {% for reason in item.reasons %}
+              <li>{{ reason }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <!-- Exams & Colleges -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;font-size:0.75rem;margin-bottom:0.75rem;">
+            <div style="padding:0.5rem;border-radius:0.5rem;background:#F8FAFC;border:1px solid #E2E8F0;">
+              <span style="font-weight:700;color:#334155;display:block;">Top Entrance Exams:</span>
+              <span style="color:#64748B;">{{ sec.entranceExams|join(', ') }}</span>
+            </div>
+            <div style="padding:0.5rem;border-radius:0.5rem;background:#F8FAFC;border:1px solid #E2E8F0;">
+              <span style="font-weight:700;color:#334155;display:block;">Compensation:</span>
+              <span style="color:#059669;font-weight:700;">{{ sec.averageSalary }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Links -->
+        <div style="padding:1rem 1.25rem;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;gap:0.5rem;flex-wrap:wrap;">
+          <a href="{{ url_for('student_sectors') }}" style="font-size:0.75rem;font-weight:700;color:#4338CA;text-decoration:none;display:flex;align-items:center;gap:0.25rem;">
+            <span>Full Syllabus & Roadmap</span>
+            <i data-lucide="arrow-right" style="width:0.875rem;height:0.875rem;"></i>
+          </a>
+          <a href="{{ url_for('student_study_material') }}?sector={{ sec.id }}" style="font-size:0.75rem;font-weight:700;color:#0F172A;text-decoration:none;">
+            Study Notes →
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+function applyPreset(type) {
+  const m = document.getElementById('input-math');
+  const p = document.getElementById('input-physics');
+  const c = document.getElementById('input-chemistry');
+  const b = document.getElementById('input-biology');
+  const cs = document.getElementById('input-cs');
+  const d = document.getElementById('input-drawing');
+  const sec = document.getElementById('desiredSector');
+
+  if (type === 'math-high') {
+    m.value = 95;
+    p.value = 68;
+    c.value = 48;
+    b.value = 32;
+    cs.value = 82;
+    d.value = 75;
+    sec.value = '';
+  } else if (type === 'spatial-architect') {
+    m.value = 90;
+    p.value = 72;
+    c.value = 55;
+    b.value = 40;
+    cs.value = 65;
+    d.value = 94;
+    sec.value = 'architecture';
+  } else if (type === 'tech-coder') {
+    m.value = 94;
+    p.value = 80;
+    c.value = 65;
+    b.value = 40;
+    cs.value = 96;
+    d.value = 50;
+    sec.value = 'computer-engineering';
+  }
+
+  // Update slider badge displays
+  ['math', 'physics', 'chemistry', 'biology', 'cs', 'drawing'].forEach(k => {
+    const el = document.getElementById('input-' + k);
+    const val = document.getElementById('val-' + k);
+    if (el && val) val.innerText = el.value + '%';
+  });
+}
+</script>
+{% endblock %}

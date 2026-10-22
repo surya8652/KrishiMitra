@@ -162,6 +162,27 @@ def api_change_location():
     session['view_state'] = state
     return redirect(request.referrer or url_for('farmer_dashboard'))
 
+# ─── API: Update Farmer Profile ───
+@app.route('/api/farmer/profile', methods=['POST'])
+def api_update_profile():
+    farmer = session.get('farmer', get_farmer_profile())
+    farmer['name'] = request.form.get('name', farmer.get('name'))
+    farmer['phone'] = request.form.get('phone', farmer.get('phone'))
+    farmer['village'] = request.form.get('village', farmer.get('village'))
+    farmer['state'] = request.form.get('state', farmer.get('state'))
+    farmer['district'] = request.form.get('district', farmer.get('district'))
+    try:
+        farmer['landSize'] = float(request.form.get('landSize', farmer.get('landSize', 2)))
+    except ValueError:
+        pass
+    farmer['soilType'] = request.form.get('soilType', farmer.get('soilType'))
+    main_crop = request.form.get('mainCrop')
+    if main_crop:
+        farmer['mainCrops'] = [main_crop]
+    session['farmer'] = farmer
+    flash('Farmer profile updated successfully!')
+    return redirect(url_for('farmer_profile'))
+
 # ─── API: Record Watering ───
 @app.route('/api/record-watering', methods=['POST'])
 def api_record_watering():

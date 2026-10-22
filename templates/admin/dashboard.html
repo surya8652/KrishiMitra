@@ -1,0 +1,157 @@
+{% extends "layouts/admin.html" %}
+{% block title %}Platform Intelligence Overview — KrishiMitra Directorate Admin{% endblock %}
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Top Directorate Banner & Controls -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-300 pb-5">
+    <div>
+      <div class="flex items-center gap-2">
+        <span style="font-size:0.75rem;font-weight:700;padding:0.125rem 0.5rem;border-radius:0.25rem;border:1px solid #9CA3AF;color:#374151;background:#fff;">
+          State Agricultural Directorate Portal
+        </span>
+        <span style="font-size:0.75rem;color:#6B7280;font-family:monospace;">Aggregation Mode</span>
+      </div>
+      <h1 style="font-size:1.75rem;font-weight:900;color:#111827;margin-top:0.25rem;">
+        Platform Intelligence Overview
+      </h1>
+      <p style="font-size:0.875rem;color:#4B5563;">
+        Real-time aggregated telemetry across 42,850+ registered smallholders in Western & Northern agro-climatic zones.
+      </p>
+    </div>
+
+    <!-- Export Controls for Admin -->
+    <div class="flex items-center gap-2 shrink-0">
+      <button
+        type="button"
+        onclick="alert('Background job queued: Exporting platform dataset krishimitra_directorate_report.csv')"
+        style="padding:0.375rem 0.75rem;border-radius:0.375rem;border:1px solid #D1D5DB;background:#fff;font-size:0.75rem;font-weight:700;display:flex;align-items:center;gap:0.375rem;cursor:pointer;color:#374151;"
+      >
+        <i data-lucide="file-spreadsheet" style="width:1rem;height:1rem;color:#1B5E20;"></i>
+        <span>Export CSV</span>
+      </button>
+
+      <button
+        type="button"
+        onclick="alert('Background job queued: Exporting platform dossier krishimitra_directorate_report.pdf')"
+        style="padding:0.375rem 0.75rem;border-radius:0.375rem;border:none;background:#1B5E20;color:#fff;font-size:0.75rem;font-weight:700;display:flex;align-items:center;gap:0.375rem;cursor:pointer;"
+      >
+        <i data-lucide="download" style="width:1rem;height:1rem;"></i>
+        <span>Export PDF Report</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Top 6 Key Metrics Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% set metric_cards = [
+      ('Total Farmers', '42,850', '+12.4% this month', 'users', '#ECFDF5', '#A7F3D0', '#065F46'),
+      ('Active Farmers Today', '18,240', '42.5% daily engagement', 'activity', '#EFF6FF', '#BFDBFE', '#1E40AF'),
+      ('Disease Checks', '94,120', '3,140 scans this week', 'scan-search', '#F0FDF4', '#BBF7D0', '#166534'),
+      ('Marketplace Listings', '3,420', '₹18.4 Cr gross trade volume', 'shopping-bag', '#FFFBEB', '#FDE68A', '#92400E'),
+      ('AI Requests Processed', '152,890', 'Average latency 640ms', 'cpu', '#FAF5FF', '#E9D5FF', '#6B21A8'),
+      ('System Status', '99.98%', 'All 8 microservices operational', 'server', '#F0FDFA', '#99F6E4', '#115E59')
+    ] %}
+
+    {% for lbl, val, chg, icn, bg, brd, tc in metric_cards %}
+    <div style="background:#fff;border-radius:1rem;border:1px solid #E5E7EB;padding:1.25rem;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;">
+        <div>
+          <span style="font-size:0.75rem;font-weight:700;color:#6B7280;text-transform:uppercase;">{{ lbl }}</span>
+          <h3 style="font-size:1.75rem;font-weight:900;color:#111827;margin-top:0.25rem;">{{ val }}</h3>
+        </div>
+        <div style="height:2.5rem;width:2.5rem;border-radius:0.75rem;background:{{ bg }};border:1px solid {{ brd }};display:flex;align-items:center;justify-content:center;color:{{ tc }};">
+          <i data-lucide="{{ icn }}" style="width:1.25rem;height:1.25rem;"></i>
+        </div>
+      </div>
+      <div style="margin-top:0.75rem;display:flex;align-items:center;gap:0.25rem;font-size:0.75rem;color:{{ tc }};font-weight:600;">
+        <span>{{ chg }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Regional Adoption Breakdown -->
+  <div style="background:#fff;border-radius:1.25rem;border:1px solid #E5E7EB;box-shadow:0 1px 3px rgba(0,0,0,0.03);padding:1.5rem;" class="space-y-4">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <h3 style="font-size:1.125rem;font-weight:800;color:#111827;">Regional Adoption & Agricultural Zone Clustering</h3>
+        <p style="font-size:0.75rem;color:#6B7280;">High-density clusters actively reporting telemetry to KrishiMitra.</p>
+      </div>
+      <a href="{{ url_for('admin_reports_users') }}" style="font-size:0.75rem;font-weight:700;color:#1B5E20;text-decoration:none;">
+        Full Demographics →
+      </a>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table style="width:100%;text-align:left;font-size:0.875rem;border-collapse:collapse;">
+        <thead>
+          <tr style="border-bottom:1px solid #F3F4F6;color:#9CA3AF;font-size:0.7rem;font-weight:700;text-transform:uppercase;">
+            <th style="padding:0.625rem 0.75rem;">District / State</th>
+            <th style="padding:0.625rem 0.75rem;">Registered Farmers</th>
+            <th style="padding:0.625rem 0.75rem;">Primary Crop</th>
+            <th style="padding:0.625rem 0.75rem;">Diagnostic Scans</th>
+            <th style="padding:0.625rem 0.75rem;text-align:right;">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set dist_rows = [
+            ('Nashik, MH', '11,420', 'Tomato / Onion', '24,800', 'High Activity', '#DCFCE7', '#166534'),
+            ('Pune, MH', '8,950', 'Sugarcane / Veg', '19,200', 'Optimal', '#DCFCE7', '#166534'),
+            ('Latur, MH', '7,310', 'Soybean / Pulses', '14,500', 'Optimal', '#DCFCE7', '#166534'),
+            ('Rajkot, GJ', '6,840', 'Cotton / Groundnut', '13,900', 'Moderate', '#FEF3C7', '#92400E'),
+            ('Ludhiana, PB', '5,120', 'Wheat / Paddy', '11,200', 'Optimal', '#DCFCE7', '#166534'),
+            ('Sehore, MP', '3,210', 'Sharbati Wheat', '6,420', 'Growing', '#EFF6FF', '#1E40AF')
+          ] %}
+          {% for dname, fc, pc, sc, st, sbg, stc in dist_rows %}
+          <tr style="border-bottom:1px solid #F9FAFB;">
+            <td style="padding:0.75rem;font-weight:700;color:#111827;">{{ dname }}</td>
+            <td style="padding:0.75rem;font-weight:600;color:#374151;">{{ fc }}</td>
+            <td style="padding:0.75rem;color:#4B5563;">{{ pc }}</td>
+            <td style="padding:0.75rem;font-family:monospace;font-weight:700;color:#111827;">{{ sc }}</td>
+            <td style="padding:0.75rem;text-align:right;">
+              <span style="font-size:0.7rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:9999px;background:{{ sbg }};color:{{ stc }};">
+                {{ st }}
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Disease Outbreak Surveillance Heatmap -->
+  <div style="background:#fff;border-radius:1.25rem;border:1px solid #E5E7EB;box-shadow:0 1px 3px rgba(0,0,0,0.03);padding:1.5rem;" class="space-y-4">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <h3 style="font-size:1.125rem;font-weight:800;color:#111827;">Crop Disease Outbreak Surveillance</h3>
+        <p style="font-size:0.75rem;color:#6B7280;">High-incidence fungal and viral clusters flagged by mobile neural vision.</p>
+      </div>
+      <a href="{{ url_for('admin_reports_disease') }}" style="font-size:0.75rem;font-weight:700;color:#1B5E20;text-decoration:none;">
+        Full Pathogen Report →
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {% set diseases = [
+        ('Tomato Early Blight', '28,400 Cases', '38% of total', 'High (Rain Trigger)', '#FEE2E2', '#B91C1C'),
+        ('Onion Purple Blotch', '22,100 Cases', '29% of total', 'Medium Alert', '#FEF3C7', '#92400E'),
+        ('Soybean Leaf Spot', '14,200 Cases', '19% of total', 'Low Alert', '#DCFCE7', '#166534'),
+        ('Cotton Leaf Curl Virus', '10,420 Cases', '14% of total', 'Localized Alert', '#FEF3C7', '#92400E')
+      ] %}
+      {% for dname, ccount, pct, alvl, abg, atc in diseases %}
+      <div style="padding:1rem;border-radius:0.75rem;border:1px solid #E5E7EB;background:#F8F9F5;">
+        <span style="font-size:0.7rem;font-weight:700;padding:0.125rem 0.375rem;border-radius:0.25rem;background:{{ abg }};color:{{ atc }};display:inline-block;margin-bottom:0.5rem;">
+          {{ alvl }}
+        </span>
+        <h4 style="font-size:0.9375rem;font-weight:800;color:#111827;">{{ dname }}</h4>
+        <span style="font-size:1.25rem;font-weight:900;color:#1B5E20;display:block;margin-top:0.25rem;">{{ ccount }}</span>
+        <span style="font-size:0.75rem;color:#6B7280;">{{ pct }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

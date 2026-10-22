@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="min-h-screen bg-[#F8F9F5] flex flex-col text-[#1E2922]">
+
+  <!-- Admin Header -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#E5E7EB] px-4 md:px-6 py-2.5 shadow-xs">
+    <div class="flex items-center justify-between gap-2 max-w-7xl mx-auto">
+      <!-- Left side: Mobile Toggle + Logo -->
+      <div class="flex items-center gap-3">
+        <button
+          type="button"
+          onclick="toggleAdminSidebar()"
+          class="lg:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100 cursor-pointer border-none bg-transparent"
+          aria-label="Toggle navigation menu"
+        >
+          <i data-lucide="menu" style="width:1.5rem;height:1.5rem;"></i>
+        </button>
+
+        <a href="{{ url_for('admin_dashboard') }}" class="flex items-center gap-2 text-decoration-none">
+          <div style="height:2.25rem;width:2.25rem;border-radius:0.5rem;background:#1B5E20;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 1px 2px rgba(0,0,0,0.05);">
+            <i data-lucide="sprout" style="width:1.25rem;height:1.25rem;"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span style="font-weight:800;font-size:1.125rem;letter-spacing:-0.025em;color:#143E23;">
+                KrishiMitra
+              </span>
+              <span style="font-size:0.75rem;font-weight:700;padding:0.125rem 0.375rem;border-radius:0.25rem;background:#D1FAE5;color:#065F46;">
+                ADMIN
+              </span>
+            </div>
+            <p class="hidden sm:block" style="font-size:10px;color:#6B7280;line-height:1.2;font-weight:500;margin:0;">
+              State Agricultural Directorate & Planning Portal
+            </p>
+          </div>
+        </a>
+      </div>
+
+      <!-- Center: Directorate Zone Tag -->
+      <div class="hidden md:flex items-center gap-2" style="padding:0.25rem 0.75rem;border-radius:9999px;background:#ECFDF5;border:1px solid #A7F3D0;font-size:0.75rem;font-weight:600;color:#064E3B;">
+        <i data-lucide="building-2" style="width:0.875rem;height:0.875rem;color:#047857;"></i>
+        <span>Central & State Directorate System</span>
+      </div>
+
+      <!-- Right Actions -->
+      <div class="flex items-center gap-2 md:gap-3">
+        <!-- Verified Admin Officer Badge -->
+        <div class="hidden sm:inline-flex items-center gap-1.5" style="padding:0.25rem 0.625rem;border-radius:9999px;font-size:0.75rem;font-weight:600;background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;">
+          <i data-lucide="shield-check" style="width:0.875rem;height:0.875rem;color:#047857;"></i>
+          <span>Directorate Admin</span>
+        </div>
+
+        <!-- Language Selector -->
+        {% include "components/language_selector.html" %}
+
+        <!-- System Alerts Bell -->
+        <a
+          href="{{ url_for('admin_reports_system') }}"
+          style="padding:0.5rem;border-radius:0.5rem;color:#4B5563;text-decoration:none;"
+          title="System & AI Status"
+        >
+          <i data-lucide="bell" style="width:1.25rem;height:1.25rem;"></i>
+        </a>
+
+        <!-- Admin Profile -->
+        <div class="flex items-center gap-2" style="padding-left:0.25rem;">
+          <div style="height:2rem;width:2rem;border-radius:9999px;background:#065F46;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:0.75rem;border:1px solid #064E3B;">
+            RK
+          </div>
+          <div class="hidden xl:block text-left">
+            <span style="display:block;font-size:0.75rem;font-weight:700;color:#111827;line-height:1.2;">
+              Dr. R. K. Sharma
+            </span>
+            <span style="display:block;font-size:10px;color:#6B7280;">
+              Officer (Directorate)
+            </span>
+          </div>
+        </div>
+
+        <!-- Logout Button -->
+        <a
+          href="{{ url_for('api_logout') }}"
+          style="display:flex;align-items:center;gap:0.25rem;padding:0.375rem 0.625rem;border-radius:0.5rem;font-size:0.75rem;font-weight:600;color:#4B5563;border:1px solid #E5E7EB;text-decoration:none;"
+          onmouseover="this.style.color='#B91C1C';this.style.background='#FEF2F2'"
+          onmouseout="this.style.color='#4B5563';this.style.background='transparent'"
+        >
+          <i data-lucide="log-out" style="width:0.875rem;height:0.875rem;"></i>
+          <span class="hidden sm:inline">Sign Out</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Body with Sidebar -->
+  <div class="flex-1 flex max-w-7xl w-full mx-auto overflow-hidden">
+    <!-- Desktop Sidebar -->
+    <aside class="hidden lg:block sidebar" style="width:16rem;background:#fff;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;flex-shrink:0;">
+      <div style="padding:0.75rem;flex:1;overflow-y:auto;" class="space-y-1">
+        <div style="padding:0.375rem 0.75rem;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#9CA3AF;">
+          Directorate Intelligence / प्रशासन
+        </div>
+
+        {% set admin_links = [
+          ('admin_dashboard', 'Platform Overview', 'layout-dashboard'),
+          ('admin_reports_users', 'Farmer Demographics', 'users'),
+          ('admin_reports_crops', 'Crop Intelligence', 'sprout'),
+          ('admin_reports_disease', 'Disease Outbreaks', 'activity'),
+          ('admin_reports_weather', 'Weather Telemetry', 'cloud-rain'),
+          ('admin_reports_irrigation', 'Water Conservation', 'droplets'),
+          ('admin_reports_market', 'Mandi Price Indices', 'trending-up'),
+          ('admin_reports_marketplace', 'Trade & Marketplace', 'store'),
+          ('admin_reports_system', 'AI Models & Telemetry', 'cpu')
+        ] %}
+
+        {% for route, label, icon in admin_links %}
+        {% set active = request.endpoint == route %}
+        <a
+          href="{{ url_for(route) }}"
+          class="sidebar-link {{ 'active' if active else '' }}"
+          style="display:flex;align-items:center;justify-content:space-between;padding:0.625rem 0.875rem;border-radius:0.75rem;font-size:0.875rem;font-weight:600;text-decoration:none;margin-bottom:0.25rem;{{ 'background:#1B5E20;color:#fff;' if active else 'color:#374151;' }}"
+        >
+          <div class="flex items-center gap-3">
+            <i data-lucide="{{ icon }}" style="width:1.25rem;height:1.25rem;{{ 'color:#fff;' if active else 'color:#2E7D32;' }}"></i>
+            <span class="truncate">{{ label }}</span>
+          </div>
+          {% if active %}
+          <i data-lucide="chevron-right" style="width:1rem;height:1rem;color:#A7F3D0;"></i>
+          {% endif %}
+        </a>
+        {% endfor %}
+      </div>
+
+      <!-- Health Card -->
+      <div style="padding:0.75rem;border-top:1px solid #F3F4F6;background:#FBF9F5;">
+        <div style="padding:0.75rem;border-radius:0.75rem;background:#E8F5E9;border:1px solid #C8E6C9;">
+          <div style="display:flex;align-items:center;gap:0.5rem;color:#1B5E20;font-weight:700;font-size:0.75rem;">
+            <i data-lucide="server" style="width:1rem;height:1rem;color:#2E7D32;"></i>
+            <span>Platform Health</span>
+          </div>
+          <p style="font-size:11px;color:#4B5563;margin-top:0.25rem;margin-bottom:0.25rem;">
+            All 8 Microservices Operational
+          </p>
+          <div style="display:flex;align-items:center;gap:0.375rem;font-size:11px;font-weight:800;color:#1B5E20;">
+            <span style="height:0.5rem;width:0.5rem;border-radius:9999px;background:#10B981;display:inline-block;"></span>
+            <span>99.98% System Uptime</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Content Area -->
+    <main class="flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8 pb-24 lg:pb-12 max-w-6xl mx-auto w-full">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+</div>
+
+<script>
+function toggleAdminSidebar() {
+  const s = document.querySelector('.sidebar');
+  if (s) {
+    s.classList.toggle('hidden');
+  }
+}
+</script>
+{% endblock %}

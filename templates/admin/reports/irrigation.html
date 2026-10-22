@@ -1,0 +1,130 @@
+{% extends "layouts/admin.html" %}
+{% block title %}Irrigation & Groundwater Conservation Report — KrishiMitra Admin{% endblock %}
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-300 pb-5">
+    <div>
+      <div class="flex items-center gap-2">
+        <span style="font-size:0.75rem;font-weight:700;padding:0.125rem 0.5rem;border-radius:0.25rem;border:1px solid #9CA3AF;color:#374151;background:#fff;">
+          Irrigation Telemetry
+        </span>
+        <span style="font-size:0.75rem;color:#6B7280;font-family:monospace;">Aquifer Analytics</span>
+      </div>
+      <h1 style="font-size:1.75rem;font-weight:900;color:#111827;margin-top:0.25rem;">
+        Irrigation & Groundwater Conservation Report
+      </h1>
+      <p style="font-size:0.875rem;color:#4B5563;">
+        Aggregated farm watering cycles, micro-irrigation adoption percentages, and water conservation analytics.
+      </p>
+    </div>
+
+    <div class="flex items-center gap-2 shrink-0">
+      <button
+        type="button"
+        onclick="alert('Exporting irrigation_conservation.csv')"
+        style="padding:0.375rem 0.75rem;border-radius:0.375rem;border:1px solid #D1D5DB;background:#fff;font-size:0.75rem;font-weight:700;display:flex;align-items:center;gap:0.375rem;cursor:pointer;color:#374151;"
+      >
+        <i data-lucide="file-spreadsheet" style="width:1rem;height:1rem;color:#1B5E20;"></i>
+        <span>Download CSV</span>
+      </button>
+      <button
+        type="button"
+        onclick="alert('Exporting irrigation_conservation.pdf')"
+        style="padding:0.375rem 0.75rem;border-radius:0.375rem;border:none;background:#1B5E20;color:#fff;font-size:0.75rem;font-weight:700;display:flex;align-items:center;gap:0.375rem;cursor:pointer;"
+      >
+        <i data-lucide="download" style="width:1rem;height:1rem;"></i>
+        <span>Download PDF</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Filter Controls -->
+  <div style="background:#fff;padding:1rem;border-radius:1rem;border:1px solid #E5E7EB;box-shadow:0 1px 2px rgba(0,0,0,0.02);display:flex;flex-wrap:wrap;align-items:center;gap:1rem;font-size:0.75rem;">
+    <div style="display:flex;align-items:center;gap:0.375rem;">
+      <i data-lucide="calendar" style="width:1rem;height:1rem;color:#9CA3AF;"></i>
+      <span style="font-weight:700;color:#374151;">Date Range:</span>
+      <select style="height:2.25rem;border-radius:0.5rem;border:1px solid #D1D5DB;padding:0 0.5rem;background:#fff;">
+        <option>Last 30 Days</option>
+        <option>Current Season</option>
+        <option>Annual</option>
+      </select>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:0.375rem;">
+      <i data-lucide="droplet" style="width:1rem;height:1rem;color:#9CA3AF;"></i>
+      <span style="font-weight:700;color:#374151;">Irrigation Method:</span>
+      <select style="height:2.25rem;border-radius:0.5rem;border:1px solid #D1D5DB;padding:0 0.5rem;background:#fff;">
+        <option>All Systems</option>
+        <option>Drip Irrigation</option>
+        <option>Sprinkler</option>
+        <option>Flood / Furrow</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    {% set istats = [
+      ('Watering Cycles Logged', '112,400', 'Recorded in farmer logbooks', '+14.2%'),
+      ('Drip Irrigation Adoption', '79.2%', 'Micro-irrigation subsidy verified', 'Water Smart'),
+      ('Groundwater Saved (Est.)', '48.2 Cr Litres', 'Through postponement advisories', 'Conservation'),
+      ('Average Watering Duration', '42 Mins', 'Every 2.8 days frequency', 'Optimal')
+    ] %}
+    {% for lbl, val, sub, bdg in istats %}
+    <div style="background:#fff;border-radius:1rem;border:1px solid #E5E7EB;padding:1.25rem;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;">
+        <span style="font-size:0.75rem;font-weight:700;color:#6B7280;text-transform:uppercase;">{{ lbl }}</span>
+        <span style="font-size:0.7rem;font-weight:700;padding:0.125rem 0.375rem;border-radius:0.25rem;background:#DCFCE7;color:#166534;">{{ bdg }}</span>
+      </div>
+      <h3 style="font-size:1.75rem;font-weight:900;color:#111827;margin-top:0.25rem;">{{ val }}</h3>
+      <span style="font-size:0.75rem;color:#6B7280;display:block;margin-top:0.25rem;">{{ sub }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Table -->
+  <div style="background:#fff;border-radius:1rem;border:1px solid #E5E7EB;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.03);" class="space-y-4">
+    <h3 style="font-size:1.125rem;font-weight:800;color:#111827;">
+      Regional Irrigation Practices & Conservation Compliance
+    </h3>
+
+    <div style="overflow-x:auto;">
+      <table style="width:100%;text-align:left;font-size:0.875rem;border-collapse:collapse;">
+        <thead>
+          <tr style="border-bottom:1px solid #F3F4F6;color:#9CA3AF;font-size:0.7rem;font-weight:700;text-transform:uppercase;">
+            <th style="padding:0.625rem 0.75rem;">Agricultural District</th>
+            <th style="padding:0.625rem 0.75rem;">Dominant Watering System</th>
+            <th style="padding:0.625rem 0.75rem;">Avg Delivered Volume</th>
+            <th style="padding:0.625rem 0.75rem;">Advisory Compliance Rate</th>
+            <th style="padding:0.625rem 0.75rem;text-align:right;">Aquifer Reserve Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set idata = [
+            ('Nashik, MH', 'Drip (Inline 16mm)', '1,250 L/Acre/Cycle', '91.2%', 'Adequate', '#DCFCE7', '#166534'),
+            ('Pune, MH', 'Drip + Furrow', '1,450 L/Acre/Cycle', '86.4%', 'Adequate', '#DCFCE7', '#166534'),
+            ('Latur, MH', 'Broadcasting / Drip', '1,800 L/Acre/Cycle', '78.0%', 'Critical Watch', '#FEF3C7', '#92400E'),
+            ('Rajkot, GJ', 'Micro-sprinklers', '1,320 L/Acre/Cycle', '84.5%', 'Moderate', '#EFF6FF', '#1E40AF')
+          ] %}
+          {% for dt, dm, vu, cr, ws, wbg, wtc in idata %}
+          <tr style="border-bottom:1px solid #F9FAFB;">
+            <td style="padding:0.75rem;font-weight:700;color:#111827;">{{ dt }}</td>
+            <td style="padding:0.75rem;color:#4B5563;">{{ dm }}</td>
+            <td style="padding:0.75rem;font-weight:600;color:#111827;">{{ vu }}</td>
+            <td style="padding:0.75rem;font-bold;color:#1B5E20;">{{ cr }}</td>
+            <td style="padding:0.75rem;text-align:right;">
+              <span style="font-size:0.7rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:9999px;background:{{ wbg }};color:{{ wtc }};">
+                {{ ws }}
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

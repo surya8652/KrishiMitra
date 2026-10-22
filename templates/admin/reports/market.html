@@ -1,0 +1,105 @@
+{% extends "layouts/admin.html" %}
+{% block title %}APMC Mandi & Price Surveillance Report — KrishiMitra Admin{% endblock %}
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-300 pb-5">
+    <div>
+      <div class="flex items-center gap-2">
+        <span style="font-size:0.75rem;font-weight:700;padding:0.125rem 0.5rem;border-radius:0.25rem;border:1px solid #9CA3AF;color:#374151;background:#fff;">
+          Mandi Intelligence
+        </span>
+        <span style="font-size:0.75rem;color:#6B7280;font-family:monospace;">e-NAM Live Stream</span>
+      </div>
+      <h1 style="font-size:1.75rem;font-weight:900;color:#111827;margin-top:0.25rem;">
+        APMC Mandi & Price Surveillance Report
+      </h1>
+      <p style="font-size:0.875rem;color:#4B5563;">
+        Daily arrival volumes, modal price oscillations, and interstate price disparities.
+      </p>
+    </div>
+
+    <div class="flex items-center gap-2 shrink-0">
+      <button
+        type="button"
+        onclick="alert('Exporting mandi_price_surveillance.csv')"
+        style="padding:0.375rem 0.75rem;border-radius:0.375rem;border:1px solid #D1D5DB;background:#fff;font-size:0.75rem;font-weight:700;display:flex;align-items:center;gap:0.375rem;cursor:pointer;color:#374151;"
+      >
+        <i data-lucide="file-spreadsheet" style="width:1rem;height:1rem;color:#1B5E20;"></i>
+        <span>Download CSV</span>
+      </button>
+      <button
+        type="button"
+        onclick="alert('Exporting mandi_price_surveillance.pdf')"
+        style="padding:0.375rem 0.75rem;border-radius:0.375rem;border:none;background:#1B5E20;color:#fff;font-size:0.75rem;font-weight:700;display:flex;align-items:center;gap:0.375rem;cursor:pointer;"
+      >
+        <i data-lucide="download" style="width:1rem;height:1rem;"></i>
+        <span>Download PDF</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    {% set mstats = [
+      ('Tracked Mandis (APMCs)', '184 APMCs', 'Live e-NAM electronic integration', 'Live Feed'),
+      ('Most Searched Mandi', 'Nashik APMC', '42,100 lookups this week', '#1 Mandi'),
+      ('Top Price Volatility', 'Tomato (+18.4%)', 'Arrival supply variations', 'Volatile'),
+      ('Average Realization vs MSP', '+12.8%', 'Across soybean & wheat trades', 'Favorable')
+    ] %}
+    {% for lbl, val, sub, bdg in mstats %}
+    <div style="background:#fff;border-radius:1rem;border:1px solid #E5E7EB;padding:1.25rem;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;">
+        <span style="font-size:0.75rem;font-weight:700;color:#6B7280;text-transform:uppercase;">{{ lbl }}</span>
+        <span style="font-size:0.7rem;font-weight:700;padding:0.125rem 0.375rem;border-radius:0.25rem;background:#DCFCE7;color:#166534;">{{ bdg }}</span>
+      </div>
+      <h3 style="font-size:1.75rem;font-weight:900;color:#111827;margin-top:0.25rem;">{{ val }}</h3>
+      <span style="font-size:0.75rem;color:#6B7280;display:block;margin-top:0.25rem;">{{ sub }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Table -->
+  <div style="background:#fff;border-radius:1rem;border:1px solid #E5E7EB;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.03);" class="space-y-4">
+    <h3 style="font-size:1.125rem;font-weight:800;color:#111827;">
+      Daily Mandi Arrivals & Benchmark Modal Rates
+    </h3>
+
+    <div style="overflow-x:auto;">
+      <table style="width:100%;text-align:left;font-size:0.875rem;border-collapse:collapse;">
+        <thead>
+          <tr style="border-bottom:1px solid #F3F4F6;color:#9CA3AF;font-size:0.7rem;font-weight:700;text-transform:uppercase;">
+            <th style="padding:0.625rem 0.75rem;">APMC Market Yard</th>
+            <th style="padding:0.625rem 0.75rem;">Primary Commodity</th>
+            <th style="padding:0.625rem 0.75rem;">Daily Arrival Quantity</th>
+            <th style="padding:0.625rem 0.75rem;">Modal Realization</th>
+            <th style="padding:0.625rem 0.75rem;text-align:right;">Weekly Delta</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set mandi_rows = [
+            ('Nashik APMC (MH)', 'Tomato', '38,000 Crates', '₹2,450 / Qtl', '+6.8%'),
+            ('Lasalgaon APMC (MH)', 'Onion', '45,000 Quintals', '₹3,200 / Qtl', '+0.8%'),
+            ('Latur APMC (MH)', 'Soybean', '22,000 Bags', '₹4,720 / Qtl', '+3.2%'),
+            ('Rajkot APMC (GJ)', 'Cotton', '18,500 Quintals', '₹7,350 / Qtl', '-1.9%'),
+            ('Khanna Mandi (PB)', 'Wheat', '28,000 Bags', '₹2,540 / Qtl', '+0.4%')
+          ] %}
+          {% for my, pc, da, mr, wd in mandi_rows %}
+          <tr style="border-bottom:1px solid #F9FAFB;">
+            <td style="padding:0.75rem;font-weight:700;color:#111827;">{{ my }}</td>
+            <td style="padding:0.75rem;color:#4B5563;">{{ pc }}</td>
+            <td style="padding:0.75rem;font-weight:600;color:#111827;">{{ da }}</td>
+            <td style="padding:0.75rem;font-bold;color:#1B5E20;">{{ mr }}</td>
+            <td style="padding:0.75rem;text-align:right;font-family:monospace;font-weight:700;color:{{ '#166534' if '+' in wd else '#B91C1C' }};">
+              {{ wd }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

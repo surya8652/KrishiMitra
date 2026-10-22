@@ -1,0 +1,127 @@
+{% extends "layouts/admin.html" %}
+{% block title %}Crop Distribution & Advisory Trends — KrishiMitra Admin{% endblock %}
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-300 pb-5">
+    <div>
+      <div class="flex items-center gap-2">
+        <span style="font-size:0.75rem;font-weight:700;padding:0.125rem 0.5rem;border-radius:0.25rem;border:1px solid #9CA3AF;color:#374151;background:#fff;">
+          Crop Intelligence
+        </span>
+        <span style="font-size:0.75rem;color:#6B7280;font-family:monospace;">Aggregated Acreage</span>
+      </div>
+      <h1 style="font-size:1.75rem;font-weight:900;color:#111827;margin-top:0.25rem;">
+        Crop Distribution & Advisory Trends
+      </h1>
+      <p style="font-size:0.875rem;color:#4B5563;">
+        Aggregated crop selection, acreage breakdown, and seasonal cultivation practices.
+      </p>
+    </div>
+
+    <div class="flex items-center gap-2 shrink-0">
+      <button
+        type="button"
+        onclick="alert('Exporting crop_distribution.csv')"
+        style="padding:0.375rem 0.75rem;border-radius:0.375rem;border:1px solid #D1D5DB;background:#fff;font-size:0.75rem;font-weight:700;display:flex;align-items:center;gap:0.375rem;cursor:pointer;color:#374151;"
+      >
+        <i data-lucide="file-spreadsheet" style="width:1rem;height:1rem;color:#1B5E20;"></i>
+        <span>Download CSV</span>
+      </button>
+      <button
+        type="button"
+        onclick="alert('Exporting crop_distribution.pdf')"
+        style="padding:0.375rem 0.75rem;border-radius:0.375rem;border:none;background:#1B5E20;color:#fff;font-size:0.75rem;font-weight:700;display:flex;align-items:center;gap:0.375rem;cursor:pointer;"
+      >
+        <i data-lucide="download" style="width:1rem;height:1rem;"></i>
+        <span>Download PDF</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Filter Controls -->
+  <div style="background:#fff;padding:1rem;border-radius:1rem;border:1px solid #E5E7EB;box-shadow:0 1px 2px rgba(0,0,0,0.02);display:flex;flex-wrap:wrap;align-items:center;gap:1rem;font-size:0.75rem;">
+    <div style="display:flex;align-items:center;gap:0.375rem;">
+      <i data-lucide="calendar" style="width:1rem;height:1rem;color:#9CA3AF;"></i>
+      <span style="font-weight:700;color:#374151;">Date Range:</span>
+      <select style="height:2.25rem;border-radius:0.5rem;border:1px solid #D1D5DB;padding:0 0.5rem;background:#fff;">
+        <option>Last 30 Days</option>
+        <option>Today</option>
+        <option>Current Kharif Season</option>
+      </select>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:0.375rem;">
+      <i data-lucide="sprout" style="width:1rem;height:1rem;color:#9CA3AF;"></i>
+      <span style="font-weight:700;color:#374151;">Crop:</span>
+      <select style="height:2.25rem;border-radius:0.5rem;border:1px solid #D1D5DB;padding:0 0.5rem;background:#fff;">
+        <option>All Crops</option>
+        <option>Tomato</option>
+        <option>Onion</option>
+        <option>Soybean</option>
+        <option>Cotton</option>
+        <option>Wheat</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    {% set cstats = [
+      ('Top Cultivated Crop', 'Tomato', '34% of active farmer plots', '#1 Focus'),
+      ('Total Monitored Acreage', '98,420 Acres', 'Average holding 2.3 acres', 'Smallholder'),
+      ('Advisories Generated', '62,150', 'Drip fertigation & ridge protocols', 'AI Guided'),
+      ('Rabi Sowing Readiness', '88.4%', 'Nursery bed prep underway', 'Seasonal')
+    ] %}
+    {% for lbl, val, sub, bdg in cstats %}
+    <div style="background:#fff;border-radius:1rem;border:1px solid #E5E7EB;padding:1.25rem;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;">
+        <span style="font-size:0.75rem;font-weight:700;color:#6B7280;text-transform:uppercase;">{{ lbl }}</span>
+        <span style="font-size:0.7rem;font-weight:700;padding:0.125rem 0.375rem;border-radius:0.25rem;background:#DCFCE7;color:#166534;">{{ bdg }}</span>
+      </div>
+      <h3 style="font-size:1.75rem;font-weight:900;color:#111827;margin-top:0.25rem;">{{ val }}</h3>
+      <span style="font-size:0.75rem;color:#6B7280;display:block;margin-top:0.25rem;">{{ sub }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Table -->
+  <div style="background:#fff;border-radius:1rem;border:1px solid #E5E7EB;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.03);" class="space-y-4">
+    <h3 style="font-size:1.125rem;font-weight:800;color:#111827;">
+      Most Selected Crops & Estimated Regional Acreage
+    </h3>
+
+    <div style="overflow-x:auto;">
+      <table style="width:100%;text-align:left;font-size:0.875rem;border-collapse:collapse;">
+        <thead>
+          <tr style="border-bottom:1px solid #F3F4F6;color:#9CA3AF;font-size:0.7rem;font-weight:700;text-transform:uppercase;">
+            <th style="padding:0.625rem 0.75rem;">Crop Variety</th>
+            <th style="padding:0.625rem 0.75rem;">Aggregate Acreage</th>
+            <th style="padding:0.625rem 0.75rem;">Dominant Soil Profile</th>
+            <th style="padding:0.625rem 0.75rem;text-align:right;">Avg Expected Productivity</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set c_acres = [
+            ('Tomato (Abhinav / Hybrid)', '33,400 Acres', 'Black Clayey Loam', '18.5 Tons/Acre'),
+            ('Onion (Kharif / Garwa)', '28,100 Acres', 'Sandy Loam', '11.2 Tons/Acre'),
+            ('Soybean (JS 335 / 9560)', '16,800 Acres', 'Deep Black Soil', '8.5 Qtl/Acre'),
+            ('Cotton (Medium Staple Bt)', '11,200 Acres', 'Medium Black Soil', '9.2 Qtl/Acre'),
+            ('Wheat (Sharbati / Lokwan)', '8,920 Acres', 'Alluvial Loam', '16.4 Qtl/Acre')
+          ] %}
+          {% for cr, ac, sl, yld in c_acres %}
+          <tr style="border-bottom:1px solid #F9FAFB;">
+            <td style="padding:0.75rem;font-weight:700;color:#111827;">{{ cr }}</td>
+            <td style="padding:0.75rem;font-weight:600;color:#374151;">{{ ac }}</td>
+            <td style="padding:0.75rem;font-size:0.75rem;color:#4B5563;">{{ sl }}</td>
+            <td style="padding:0.75rem;text-align:right;font-family:monospace;font-weight:700;color:#1B5E20;">{{ yld }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

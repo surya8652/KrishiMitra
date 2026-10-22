@@ -1,0 +1,161 @@
+{% extends "layouts/farmer.html" %}
+{% block title %}Watering Advice — KrishiMitra AI{% endblock %}
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div style="display:flex;flex-direction:column;gap:1rem;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+      <div style="display:flex;align-items:flex-start;gap:0.75rem;">
+        <div style="padding:0.5rem;border-radius:0.5rem;background:#DBEAFE;color:#1D4ED8;">
+          <i data-lucide="droplet" style="width:1.5rem;height:1.5rem;"></i>
+        </div>
+        <div>
+          <h1 style="font-size:clamp(1.5rem,4vw,2rem);font-weight:900;color:#111827;">Watering Advice</h1>
+          <p style="font-size:0.875rem;color:#6B7280;">Smart watering recommendations based on crop stage, soil moisture, and weather forecast.</p>
+        </div>
+      </div>
+      <button type="button" onclick="document.getElementById('waterModal').style.display='flex'" class="btn btn-primary" style="font-size:0.875rem;gap:0.5rem;flex-shrink:0;">
+        <i data-lucide="plus" style="width:1rem;height:1rem;"></i> Record Watered Today
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Status Card -->
+  <div style="background:#fff;border-radius:1.5rem;border:2px solid rgba(5,150,105,0.3);padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+    <div style="display:flex;flex-direction:column;gap:1rem;border-bottom:1px solid #F3F4F6;padding-bottom:1.25rem;margin-bottom:1.25rem;">
+      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:1rem;">
+        <div>
+          <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+            <span style="font-size:0.7rem;font-weight:700;padding:0.125rem 0.5rem;border-radius:9999px;background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7;">Current Advice</span>
+            <span style="font-size:0.7rem;color:#9CA3AF;font-weight:500;">Plot: {{ farmer.get('village','Village') }} (2 Acres)</span>
+          </div>
+          <h2 style="font-size:1.5rem;font-weight:900;color:#111827;">{{ irrigation.get('recommendation','Water your crops today') }}</h2>
+        </div>
+        <div style="background:#E8F5E9;padding:0.75rem 1rem;border-radius:1rem;border:1px solid #A7F3D0;text-align:center;flex-shrink:0;">
+          <span style="font-size:0.7rem;font-weight:700;color:#1B5E20;text-transform:uppercase;display:block;">Soil Moisture</span>
+          <span style="font-size:1.25rem;font-weight:900;color:#14532D;">{{ irrigation.get('soilMoistureLevel','Moderate') }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Why this advice -->
+    <div style="margin-bottom:1.25rem;">
+      <h3 style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:#1B5E20;display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+        <i data-lucide="check-circle-2" style="width:1rem;height:1rem;color:#2E7D32;"></i>
+        Why this advice?
+      </h3>
+      <div style="padding:1rem;border-radius:0.75rem;background:#F8F9F5;border:1px solid #E5E7EB;">
+        <p style="font-size:0.875rem;color:#374151;line-height:1.65;font-weight:500;">{{ irrigation.get('whyReason','Based on current soil moisture, crop stage, and weather forecast.') }}</p>
+      </div>
+    </div>
+
+    <!-- Field Conditions Grid -->
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:0.875rem;margin-bottom:1.25rem;">
+      {% set conditions = [
+        ('Crop Variety', irrigation.get('crop','Tomato')),
+        ('Soil Type', irrigation.get('soil','Medium Black Clayey Loam').split('(')[0]),
+        ('Recent Rainfall', irrigation.get('recentRainfall','None')),
+        ('Weather Condition', irrigation.get('weatherSummary','Sunny').split('—')[0])
+      ] %}
+      {% for label, value in conditions %}
+      <div style="padding:0.875rem;border-radius:0.75rem;background:#F9FAFB;border:1px solid #F3F4F6;">
+        <span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#9CA3AF;display:block;margin-bottom:0.25rem;">{{ label }}</span>
+        <span style="font-size:0.875rem;font-weight:700;color:#111827;">{{ value }}</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Timing Bar -->
+    <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:0.75rem;padding:0.875rem 1rem;border-radius:0.75rem;background:#FFF8E1;border:1px solid #FFE082;font-size:0.875rem;">
+      <div style="display:flex;align-items:center;gap:0.5rem;color:#92400E;font-weight:500;">
+        <i data-lucide="clock" style="width:1rem;height:1rem;color:#D97706;"></i>
+        <span><strong>Last Irrigated: </strong>{{ irrigation.get('lastIrrigated','Yesterday') }}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.5rem;color:#92400E;font-weight:500;">
+        <i data-lucide="calendar" style="width:1rem;height:1rem;color:#D97706;"></i>
+        <span><strong>Next Check: </strong>{{ irrigation.get('nextCheck','Tomorrow morning') }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Personal Logbook -->
+  <div style="background:#fff;border-radius:1rem;border:1px solid #E5E7EB;padding:1.5rem;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #F3F4F6;padding-bottom:0.75rem;margin-bottom:1rem;">
+      <div style="display:flex;align-items:center;gap:0.5rem;">
+        <i data-lucide="history" style="width:1.25rem;height:1.25rem;color:#1B5E20;"></i>
+        <h3 style="font-weight:800;font-size:1.05rem;color:#111827;">Personal Watering Logbook</h3>
+      </div>
+      <span style="font-size:0.75rem;color:#9CA3AF;font-weight:600;">{{ irrigation.get('logs',[]) | length }} Recorded Cycles</span>
+    </div>
+
+    {% if irrigation.get('logs') %}
+    <div>
+      {% for log in irrigation.logs %}
+      <div style="padding:0.875rem 0.5rem;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:0.75rem;border-bottom:1px solid #F9FAFB;transition:background 150ms;" onmouseover="this.style.background='#F8F9F5'" onmouseout="this.style.background='transparent'">
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <div style="height:2rem;width:2rem;border-radius:9999px;background:#DBEAFE;color:#1D4ED8;display:flex;align-items:center;justify-content:center;">
+            <i data-lucide="droplet" style="width:1rem;height:1rem;"></i>
+          </div>
+          <div>
+            <h4 style="font-size:0.875rem;font-weight:700;color:#111827;">{{ log.get('crop','Tomato') }} — {{ log.get('method','Drip Irrigation') }}</h4>
+            <p style="font-size:0.75rem;color:#9CA3AF;">{{ log.get('notes','Normal cycle') }}</p>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:1rem;text-align:right;">
+          <div>
+            <span style="font-size:0.8rem;font-weight:700;color:#111827;display:block;">{{ log.get('waterAmount','1,200 Litres') }}</span>
+            <span style="font-size:0.7rem;color:#9CA3AF;">{{ log.get('date','') }}</span>
+          </div>
+          <span style="font-size:0.7rem;font-weight:700;padding:0.25rem 0.625rem;border-radius:9999px;background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7;">{{ log.get('status','Completed') }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="text-align:center;color:#9CA3AF;padding:2rem;font-size:0.875rem;">No watering logs yet. Record your first watering session above.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Water Recording Modal -->
+<div id="waterModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:#fff;border-radius:1.25rem;width:100%;max-width:28rem;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:1.25rem 1.25rem 0;">
+      <div>
+        <h3 style="font-weight:700;font-size:1.05rem;color:#111827;">Record Farm Watering</h3>
+        <p style="font-size:0.75rem;color:#9CA3AF;margin-top:0.25rem;">Log today's watering session into your farm logbook.</p>
+      </div>
+      <button onclick="document.getElementById('waterModal').style.display='none'" style="font-size:1.25rem;line-height:1;border:none;background:none;cursor:pointer;color:#9CA3AF;padding:0.25rem;">✕</button>
+    </div>
+    <form method="POST" action="{{ url_for('api_record_watering') }}" style="padding:1.25rem;">
+      <div class="space-y-4">
+        <div>
+          <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.375rem;">Crop Watered / पीक</label>
+          <select name="crop" style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;background:#fff;box-sizing:border-box;">
+            {% for c in farmer.get('mainCrops',['Tomato']) %}
+            <option value="{{ c }}">{{ c }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.375rem;">Irrigation Method</label>
+          <select name="method" style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;background:#fff;box-sizing:border-box;">
+            <option value="Drip Irrigation">Drip Irrigation (ठिबक सिंचन)</option>
+            <option value="Sprinkler Irrigation">Sprinkler Irrigation (तुषार सिंचन)</option>
+            <option value="Furrow / Channel Watering">Furrow / Channel Watering (पाट पाणी)</option>
+          </select>
+        </div>
+        <div>
+          <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.375rem;">Approx. Water Delivered / वेळ</label>
+          <input type="text" name="amount" placeholder="e.g. 1,200 Litres or 45 mins" value="1,200 Litres" style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;box-sizing:border-box;" required />
+        </div>
+        <div style="display:flex;gap:0.75rem;padding-top:0.5rem;">
+          <button type="button" onclick="document.getElementById('waterModal').style.display='none'" style="flex:1;height:2.75rem;border-radius:0.75rem;border:1px solid #E5E7EB;background:#fff;font-size:0.875rem;font-weight:700;cursor:pointer;">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="flex:2;height:2.75rem;font-size:0.875rem;">Save to Farm Book</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
