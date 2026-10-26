@@ -3,10 +3,14 @@ import sys
 import json
 import time
 from datetime import datetime
+from dotenv import load_dotenv
 from flask import (
     Flask, render_template, request, redirect, url_for,
     session, flash, jsonify, g
 )
+
+# Load environment variables from .env
+load_dotenv()
 
 # Add project root to path so services can be imported
 sys.path.insert(0, os.path.dirname(__file__))
@@ -27,7 +31,18 @@ from services.data_store import (
 from services.student_service import analyze_student_profile
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
-app.secret_key = 'krishimitra-flask-secret-key-2024'
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'krishimitra-flask-secret-key-2024')
+
+# ─── Supabase Auth (imported lazily to allow running without Supabase) ───
+try:
+    from services.supabase_auth import (
+        sign_up_with_email, sign_in_with_email,
+        get_google_oauth_url, exchange_code_for_session,
+        sign_out as supabase_sign_out, get_user_from_token
+    )
+    SUPABASE_ENABLED = bool(os.environ.get('SUPABASE_URL'))
+except Exception:
+    SUPABASE_ENABLED = False
 
 # ─── Context Processor: inject common data into all templates ───
 @app.context_processor
@@ -45,6 +60,7 @@ def inject_globals():
     unread_count = len([n for n in notifications if not n.get('read')])
     is_authenticated = role != 'guest'
     year = datetime.now().year
+    supabase_user = session.get('supabase_user', None)
 
     return dict(
         t=t,
@@ -55,6 +71,8 @@ def inject_globals():
         notifications=notifications,
         unread_count=unread_count,
         is_authenticated=is_authenticated,
+        supabase_user=supabase_user,
+        supabase_enabled=SUPABASE_ENABLED,
         supported_languages=SUPPORTED_LANGUAGES,
         all_india_states=ALL_INDIA_STATES,
         year=year
@@ -94,7 +112,19 @@ def api_login():
     identifier = request.form.get('identifier', '')
     password = request.form.get('password', '')
 
-    # Demo auth - accept known demo credentials
+    # Try Supabase email/password auth first
+    if SUPABASE_ENABLED and '@' in identifier:
+        user_data, error = sign_in_with_email(identifier, password)
+        if user_data:
+            _setup_supabase_session(user_data, selected_role)
+            name = user_data.get('metadata', {}).get('name', identifier.split('@')[0])
+            flash(f"Welcome back, {name}! Signed in via Supabase.")
+            return redirect(_get_role_dashboard(selected_role))
+        else:
+            flash(f'Supabase auth error: {error}')
+            return redirect(url_for('login'))
+
+    # Demo auth fallback - accept known demo credentials
     if selected_role == 'farmer':
         session['role'] = 'farmer'
         session['farmer'] = get_farmer_profile()
@@ -119,7 +149,31 @@ def api_login():
 def api_register():
     selected_role = request.form.get('role', 'farmer')
     name = request.form.get('name', 'New User')
+    email = request.form.get('email', '')
+    password = request.form.get('password', '')
+    phone = request.form.get('phone', '')
+    state = request.form.get('state', 'Maharashtra')
+    district = request.form.get('district', 'Nashik')
 
+    # Try Supabase registration if email + password provided
+    if SUPABASE_ENABLED and email and password:
+        metadata = {
+            'name': name,
+            'role': selected_role,
+            'phone': phone,
+            'state': state,
+            'district': district,
+        }
+        user_data, error = sign_up_with_email(email, password, metadata)
+        if user_data:
+            _setup_supabase_session(user_data, selected_role, name=name)
+            flash(f"Welcome to KrishiMitra, {name}! Account created successfully.")
+            return redirect(_get_role_dashboard(selected_role))
+        else:
+            flash(f'Registration error: {error}')
+            return redirect(url_for('register'))
+
+    # Demo fallback registration
     if selected_role == 'farmer':
         profile = get_farmer_profile()
         profile['name'] = name
@@ -138,9 +192,120 @@ def api_register():
 # ─── API: Logout ───
 @app.route('/api/logout')
 def api_logout():
+    # Sign out from Supabase if we have a token
+    if SUPABASE_ENABLED and session.get('access_token'):
+        try:
+            supabase_sign_out(session.get('access_token'))
+        except Exception:
+            pass
     session.clear()
     flash('Logged out successfully. You are now in Guest Mode.')
     return redirect(url_for('landing'))
+
+
+# ════════════════════════════════════════════════════════════════════
+#  GOOGLE OAUTH ROUTES (Supabase)
+# ════════════════════════════════════════════════════════════════════
+
+@app.route('/auth/google')
+def auth_google():
+    """Initiate Google OAuth sign-in via Supabase."""
+    if not SUPABASE_ENABLED:
+        flash('Supabase is not configured. Please set SUPABASE_URL and SUPABASE_ANON_KEY.')
+        return redirect(url_for('login'))
+
+    # Store the intended role for after callback
+    role = request.args.get('role', 'farmer')
+    session['pending_oauth_role'] = role
+
+    # Build the callback URL
+    callback_url = url_for('auth_callback', _external=True)
+    oauth_url, error = get_google_oauth_url(callback_url)
+
+    if error:
+        flash(f'Google sign-in error: {error}')
+        return redirect(url_for('login'))
+
+    return redirect(oauth_url)
+
+
+@app.route('/auth/callback')
+def auth_callback():
+    """Handle the OAuth callback from Supabase/Google."""
+    code = request.args.get('code')
+    error_param = request.args.get('error')
+    error_desc = request.args.get('error_description', 'Authentication cancelled.')
+
+    if error_param:
+        flash(f'Google sign-in was cancelled: {error_desc}')
+        return redirect(url_for('login'))
+
+    if not code:
+        flash('No authorization code received. Please try again.')
+        return redirect(url_for('login'))
+
+    user_data, error = exchange_code_for_session(code)
+    if error:
+        flash(f'Sign-in failed: {error}')
+        return redirect(url_for('login'))
+
+    # Get the role the user selected before OAuth
+    selected_role = session.pop('pending_oauth_role', 'farmer')
+    name = user_data.get('name', '') or user_data.get('email', '').split('@')[0]
+
+    _setup_supabase_session(user_data, selected_role, name=name)
+    flash(f"Welcome, {name}! Signed in with Google.")
+    return redirect(_get_role_dashboard(selected_role))
+
+
+# ─── Helper: Set up Flask session from Supabase user ───
+def _setup_supabase_session(user_data, role, name=None):
+    """Populate Flask session with Supabase user info."""
+    if not name:
+        name = user_data.get('name', '') or \
+               user_data.get('metadata', {}).get('name', '') or \
+               user_data.get('email', '').split('@')[0]
+
+    session['role'] = role
+    session['access_token'] = user_data.get('access_token')
+    session['refresh_token'] = user_data.get('refresh_token')
+    session['supabase_user'] = {
+        'id': user_data.get('id'),
+        'email': user_data.get('email'),
+        'name': name,
+        'avatar': user_data.get('avatar', ''),
+    }
+
+    # Set up the appropriate profile
+    if role == 'farmer':
+        profile = get_farmer_profile()
+        profile['name'] = name
+        if user_data.get('metadata', {}).get('phone'):
+            profile['phone'] = user_data['metadata']['phone']
+        if user_data.get('metadata', {}).get('state'):
+            profile['state'] = user_data['metadata']['state']
+        if user_data.get('metadata', {}).get('district'):
+            profile['district'] = user_data['metadata']['district']
+        session['farmer'] = profile
+    elif role == 'student':
+        profile = get_student_profile()
+        profile['name'] = name
+        session['farmer'] = profile
+    elif role == 'admin':
+        profile = get_admin_profile()
+        profile['name'] = name
+        session['farmer'] = profile
+
+
+def _get_role_dashboard(role):
+    """Return the URL for the given role's dashboard."""
+    if role == 'farmer':
+        return url_for('farmer_dashboard')
+    elif role == 'student':
+        return url_for('student_career_analyzer')
+    elif role == 'admin':
+        return url_for('admin_dashboard')
+    return url_for('landing')
 
 # ─── API: Change Location ───
 @app.route('/api/change-location', methods=['POST'])

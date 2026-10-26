@@ -59,7 +59,7 @@
 
         <!-- Profile Avatar -->
         <a href="{{ url_for('farmer_profile') }}" class="flex items-center gap-2" style="padding-left:0.25rem;">
-          <img src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=100&q=80" alt="{{ farmer.get('name', 'Farmer') }}" class="avatar" />
+          <img src="{{ supabase_user.avatar if (supabase_user and supabase_user.avatar) else 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=100&q=80' }}" alt="{{ farmer.get('name', 'Farmer') }}" class="avatar" />
           <span class="hidden xl:inline" style="font-size:0.75rem;font-weight:700;color:#1F2937;">{{ farmer.get('name', 'Farmer').split(' ')[0] }}</span>
         </a>
       </div>

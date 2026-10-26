@@ -55,6 +55,13 @@
             </div>
           </div>
           <div>
+            <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.25rem;">Email Address</label>
+            <div style="position:relative;">
+              <span style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:#9CA3AF;"><i data-lucide="mail" style="width:1rem;height:1rem;"></i></span>
+              <input type="email" id="s1Email" name="email" placeholder="e.g. ramesh@example.com" style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem 0 2.5rem;font-size:0.875rem;box-sizing:border-box;"/>
+            </div>
+          </div>
+          <div>
             <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.25rem;">Mobile Number</label>
             <div style="position:relative;">
               <span style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:#9CA3AF;"><i data-lucide="phone" style="width:1rem;height:1rem;"></i></span>
@@ -98,6 +105,21 @@
           </button>
         </form>
       </div>
+
+      <!-- Google Sign-Up (only when Supabase is configured) -->
+      {% if supabase_enabled %}
+      <div style="padding:0 1.5rem 0.75rem;">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+          <div style="flex:1;height:1px;background:#E5E7EB;"></div>
+          <span style="font-size:0.7rem;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.05em;">or sign up with</span>
+          <div style="flex:1;height:1px;background:#E5E7EB;"></div>
+        </div>
+        <a href="#" id="googleRegBtn" onclick="googleRegister()" style="display:flex;align-items:center;justify-content:center;gap:0.625rem;width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;background:#fff;color:#374151;font-size:0.875rem;font-weight:600;cursor:pointer;text-decoration:none;transition:all 150ms;box-shadow:0 1px 3px rgba(0,0,0,0.06);" onmouseover="this.style.background='#F9FAFB';this.style.borderColor='#9CA3AF';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.1)'" onmouseout="this.style.background='#fff';this.style.borderColor='#D1D5DB';this.style.boxShadow='0 1px 3px rgba(0,0,0,0.06)'">
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+          <span>Sign up with Google</span>
+        </a>
+      </div>
+      {% endif %}
     </div>
 
     <!-- STEP 2 CARD (hidden) -->
@@ -120,8 +142,10 @@
           <input type="hidden" name="role" value="farmer" />
           <input type="hidden" name="name" id="hiddenName" />
           <input type="hidden" name="phone" id="hiddenPhone" />
+          <input type="hidden" name="email" id="hiddenEmail" />
           <input type="hidden" name="state" id="hiddenState" />
           <input type="hidden" name="district" id="hiddenDistrict" />
+          <input type="hidden" name="password" id="hiddenPassword" />
           <div>
             <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.25rem;">Village / Town Name</label>
             <input type="text" name="village" placeholder="e.g. Dindori, Pimpalgaon, Khanna" style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;box-sizing:border-box;"/>
@@ -167,8 +191,10 @@
           <input type="hidden" name="role" value="student" />
           <input type="hidden" name="name" id="hiddenNameS" />
           <input type="hidden" name="phone" id="hiddenPhoneS" />
+          <input type="hidden" name="email" id="hiddenEmailS" />
           <input type="hidden" name="state" id="hiddenStateS" />
           <input type="hidden" name="district" id="hiddenDistrictS" />
+          <input type="hidden" name="password" id="hiddenPasswordS" />
           <div>
             <label style="display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#374151;margin-bottom:0.25rem;">Current Class / Level</label>
             <select name="classLevel" style="width:100%;height:2.75rem;border-radius:0.75rem;border:1px solid #D1D5DB;padding:0 0.75rem;font-size:0.875rem;background:#fff;box-sizing:border-box;">
@@ -272,6 +298,11 @@ function goStep2(e) {
   ['hiddenState','hiddenStateS'].forEach(id => { const el = document.getElementById(id); if(el) el.value = state; });
   ['hiddenDistrict','hiddenDistrictS'].forEach(id => { const el = document.getElementById(id); if(el) el.value = district; });
 
+  // Also pass email and password to hidden fields
+  const email = document.getElementById('s1Email') ? document.getElementById('s1Email').value : '';
+  ['hiddenEmail','hiddenEmailS'].forEach(id => { const el = document.getElementById(id); if(el) el.value = email; });
+  ['hiddenPassword','hiddenPasswordS'].forEach(id => { const el = document.getElementById(id); if(el) el.value = pass; });
+
   const isFarmer = currentRegRole === 'farmer';
   const color = isFarmer ? '#1B5E20' : '#4F46E5';
 
@@ -290,6 +321,10 @@ function goStep2Skip() {
   const isFarmer = currentRegRole === 'farmer';
   const form = isFarmer ? document.getElementById('farmerStep2') : document.getElementById('studentStep2');
   form.submit();
+}
+
+function googleRegister() {
+  window.location.href = '{{ url_for("auth_google") }}?role=' + currentRegRole;
 }
 </script>
 {% endblock %}
